@@ -61,26 +61,26 @@ void Camera::Init()
     {
         if (HTarget.x >= 0.0f)
         {
-            m_AngleH = 360.0f - ToDegree(asin(HTarget.z));
+            m_AngleH = 360.0f - glm::degrees(asin(HTarget.z));
         }
         else
         {
-            m_AngleH = 180.0f + ToDegree(asin(HTarget.z));
+            m_AngleH = 180.0f + glm::degrees(asin(HTarget.z));
         }
     }
     else
     {
         if (HTarget.x >= 0.0f)
         {
-            m_AngleH = ToDegree(asin(-HTarget.z));
+            m_AngleH = glm::degrees(asin(-HTarget.z));
         }
         else
         {
-            m_AngleH = 180.0f - ToDegree(asin(-HTarget.z));
+            m_AngleH = 180.0f - glm::degrees(asin(-HTarget.z));
         }
     }
 
-    m_AngleV = -ToDegree(asin(m_target.y));
+    m_AngleV = -glm::degrees(asin(m_target.y));
 
     m_OnUpperEdge = false;
     m_OnLowerEdge = false;
