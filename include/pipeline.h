@@ -51,12 +51,13 @@ struct Transform
 
     glm::mat4x4 GetTranslationMatrix() const
     {
-        return glm::translate(glm::mat4x4(1.0f), m_pos);
+        return glm::transpose(glm::translate(glm::mat4x4(1.0f), m_pos));
     }
 
     glm::mat4x4 GetMatrix() const
     {
-        return GetTranslationMatrix() * GetRotationMatrix() * GetScaleMatrix();
+        // glm乘法得反过来，，，https://zhuanlan.zhihu.com/p/481867433
+        return GetScaleMatrix() * GetRotationMatrix() * GetTranslationMatrix();
     }
 };
 
@@ -143,36 +144,32 @@ public:
     const glm::mat4x4& GetWorldTrans(){
     
         m_Wtransformation = worldTrans.GetMatrix();
-#ifdef IS_DEBUG
-        std::cout << "W.m_pos" << " ";
-        PrintGLMVec3(worldTrans.m_pos);
-        std::cout << "W.m_rotation" << " ";
-        PrintGLMVec3(worldTrans.m_rotation);
-        std::cout << "W.m_scale" << " ";
-        PrintGLMVec3(worldTrans.m_scale);
-        std::cout << "W.m_Wtransformation" << " ";
-        PrintGLMMat4x4(m_Wtransformation);
-#endif
         return m_Wtransformation;
     }
     const glm::mat4x4& GetViewTrans(){
-        m_Vtransformation = glm::lookAt(m_camera.Pos, m_camera.Target, m_camera.Up);
+        m_Vtransformation = glm::transpose(glm::lookAt(m_camera.Pos, -m_camera.Target + m_camera.Pos, m_camera.Up));
         return m_Vtransformation;
     }
     const glm::mat4x4& GetProjTrans(){
-        m_ProjTransformation = glm::perspective(m_persParam.FOV, m_persParam.Width/m_persParam.Height, m_persParam.zNear, m_persParam.zFar);
+        m_ProjTransformation = glm::transpose(glm::perspectiveFovLH(glm::radians(m_persParam.FOV), m_persParam.Height, m_persParam.Width, m_persParam.zNear, m_persParam.zFar));
+        //todo: warn: 怀疑原本代码公式出错
+        // 如果显示效果不对，考虑加上下面的代码并修正test
+        // float temp = m_ProjTransformation[1][1];
+        // m_ProjTransformation[1][1] = m_ProjTransformation[0][0];
+        // m_ProjTransformation[0][0] = temp;
         return m_ProjTransformation;
     }
     const glm::mat4x4& GetOrthoTrans(){
+        // todo: test
         m_ProjTransformation = glm::ortho(m_orthoParam.left, m_orthoParam.right, m_orthoParam.bottom, m_orthoParam.top, m_orthoParam.zNear, m_orthoParam.zFar);
         return m_ProjTransformation;
     }
     const glm::mat4x4& GetWVPTrans(){
-        m_WVPtransformation = GetProjTrans() * GetViewTrans() * GetWorldTrans();
+        m_WVPtransformation = GetWorldTrans() * GetViewTrans() * GetProjTrans();
         return m_WVPtransformation;
     }
     const glm::mat4x4& GetWVOTrans(){
-        m_WVOtransformation = GetOrthoTrans() * GetViewTrans() * GetWorldTrans();
+        m_WVOtransformation = GetWorldTrans() * GetViewTrans() * GetOrthoTrans();
         return m_WVOtransformation;
     }
 private:
