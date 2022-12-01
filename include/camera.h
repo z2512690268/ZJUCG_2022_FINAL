@@ -13,8 +13,10 @@ public:
 
     Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
 
-    bool OnKeyboard(int Key);
+    bool OnSpecialKey(int Key);
 
+    bool OnKeyboard(int Key);
+    
     void OnMouse(int x, int y);
 
     void OnRender();

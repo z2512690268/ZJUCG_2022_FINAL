@@ -152,15 +152,15 @@ public:
     }
     const glm::mat4x4& GetProjTrans(){
         m_ProjTransformation = glm::transpose(glm::perspectiveFovLH(glm::radians(m_persParam.FOV), m_persParam.Height, m_persParam.Width, m_persParam.zNear, m_persParam.zFar));
-        //todo: warn: 怀疑原本代码公式出错
-        // 如果显示效果不对，考虑加上下面的代码并修正test
-        // float temp = m_ProjTransformation[1][1];
-        // m_ProjTransformation[1][1] = m_ProjTransformation[0][0];
-        // m_ProjTransformation[0][0] = temp;
+        // FIXED: warn: 怀疑原本代码公式出错
+        // 加上下面的代码并修正test即可恢复，原理未知
+        float temp = m_ProjTransformation[1][1];
+        m_ProjTransformation[1][1] = m_ProjTransformation[0][0];
+        m_ProjTransformation[0][0] = temp;
         return m_ProjTransformation;
     }
     const glm::mat4x4& GetOrthoTrans(){
-        // todo: test
+        // TODO: debug
         m_ProjTransformation = glm::ortho(m_orthoParam.left, m_orthoParam.right, m_orthoParam.bottom, m_orthoParam.top, m_orthoParam.zNear, m_orthoParam.zFar);
         return m_ProjTransformation;
     }

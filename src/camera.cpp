@@ -20,8 +20,8 @@
 #include "camera.h"
 #include "mathfunc.h"
 
-const static float STEP_SCALE = 1.0f;
-const static float EDGE_STEP = 0.5f;
+const static float STEP_SCALE = 0.2;
+const static float EDGE_STEP = 1.5f;
 const static int MARGIN = 10;
 
 Camera::Camera(int WindowWidth, int WindowHeight)
@@ -30,7 +30,6 @@ Camera::Camera(int WindowWidth, int WindowHeight)
     m_windowHeight = WindowHeight;
     m_pos          = glm::vec3(0.0f, 0.0f, 0.0f);
     m_target       = glm::vec3(0.0f, 0.0f, 1.0f);
-    glm::normalize(m_target);
     m_up           = glm::vec3(0.0f, 1.0f, 0.0f);
 
     Init();
@@ -94,59 +93,92 @@ void Camera::Init()
 }
 
 
-bool Camera::OnKeyboard(int Key)
+bool Camera::OnSpecialKey(int Key)
 {
     bool Ret = false;
 
     switch (Key) {
 
     case GLUT_KEY_UP:
-        {
-            m_pos += (m_target * STEP_SCALE);
-            Ret = true;
-        }
+        OnKeyboard('w');
+        Ret = true;
         break;
 
     case GLUT_KEY_DOWN:
-        {
-            m_pos -= (m_target * STEP_SCALE);
-            Ret = true;
-        }
+        OnKeyboard('s');
+        Ret = true;
         break;
 
     case GLUT_KEY_LEFT:
-        {
-            glm::vec3 Left = glm::cross(m_target, m_up);
-            glm::normalize(Left);
-            Left *= STEP_SCALE;
-            m_pos += Left;
-            Ret = true;
-        }
+        OnKeyboard('a');
+        Ret = true;
         break;
 
     case GLUT_KEY_RIGHT:
-        {
-            glm::vec3 Right = glm::cross(m_up, m_target);
-            glm::normalize(Right);
-            Right *= STEP_SCALE;
-            m_pos += Right;
-            Ret = true;
-        }
+        OnKeyboard('d');
+        Ret = true;
         break;
         
     case GLUT_KEY_PAGE_UP:
-        m_pos.y += STEP_SCALE;
+        OnKeyboard('z');
+        Ret = true;
         break;
     
     case GLUT_KEY_PAGE_DOWN:
-        m_pos.y -= STEP_SCALE;
+        OnKeyboard('c');
+        Ret = true;
         break;
     
-    default:
+    default: 
         break;            
     }
 
     return Ret;
+}
+
+bool Camera::OnKeyboard(int Key) {
+    bool Ret = false;
+    switch (Key) {
+    case 'w':
+        m_pos += (m_target * STEP_SCALE);
+        Ret = true;
+        break;
+    case 's':
+        m_pos -= (m_target * STEP_SCALE);
+        Ret = true;
+        break;
+    case 'a':
+        glm::vec3 Left = glm::cross(m_target, m_up);
+        glm::normalize(Left);
+        Left *= STEP_SCALE;
+        m_pos += Left;
+        Ret = true;
+        break;
+    case 'd':
+        glm::vec3 Right = glm::cross(m_up, m_target);
+        glm::normalize(Right);
+        Right *= STEP_SCALE;
+        m_pos += Right;
+        Ret = true;
+        break;
+    case 'z': // space
+        m_pos.y += STEP_SCALE;
+        Ret = true;
+        break;
+    case 'c':
+        m_pos.y -= STEP_SCALE;
+        Ret = true;
+        break;
+    case 'r':
+        m_pos          = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_target       = glm::vec3(0.0f, 0.0f, 1.0f);
+        m_up           = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        Init();
+        Ret = true;
+        break;
+    }
+    return Ret;        
 }
 
 
@@ -163,11 +195,9 @@ void Camera::OnMouse(int x, int y)
 
     if (DeltaX == 0) {
         if (x <= MARGIN) {
-        //    m_AngleH -= 1.0f;
             m_OnLeftEdge = true;
         }
         else if (x >= (m_windowWidth - MARGIN)) {
-        //    m_AngleH += 1.0f;
             m_OnRightEdge = true;
         }
     }
@@ -204,7 +234,7 @@ void Camera::OnRender()
     else if (m_OnRightEdge) {
         m_AngleH += EDGE_STEP;
         ShouldUpdate = true;
-    }
+    } 
 
     if (m_OnUpperEdge) {
         if (m_AngleV > -90.0f) {
