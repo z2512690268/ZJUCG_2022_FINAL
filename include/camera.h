@@ -3,8 +3,7 @@
 
 
 #include "mathfunc.h"
-#include "key.h"
-
+#include <GL/freeglut.h>
 
 class Camera
 {
@@ -14,7 +13,7 @@ public:
 
     Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
 
-    bool OnKeyboard(KEY_ENUM Key);
+    bool OnKeyboard(int Key);
 
     void OnMouse(int x, int y);
 

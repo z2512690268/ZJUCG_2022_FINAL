@@ -3,7 +3,7 @@
 
 #include "mathfunc.h"
 #include "camera.h"
-
+#include "debug.h"
 struct PersParam
 {
     float FOV;
@@ -43,13 +43,10 @@ struct Transform
 
     glm::mat4x4 GetRotationMatrix() const
     {
-        glm::mat4x4 RotationMatrix = glm::mat4x4(1.0f);
-
-        RotationMatrix = glm::rotate(RotationMatrix, m_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        RotationMatrix = glm::rotate(RotationMatrix, m_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        RotationMatrix = glm::rotate(RotationMatrix, m_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-
-        return RotationMatrix;
+        glm::mat4x4 RotateX = glm::rotate(glm::mat4x4(1.0f), glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4x4 RotateY = glm::rotate(glm::mat4x4(1.0f), glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4x4 RotateZ = glm::rotate(glm::mat4x4(1.0f), glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        return RotateZ * RotateY * RotateX;
     }
 
     glm::mat4x4 GetTranslationMatrix() const
@@ -144,7 +141,18 @@ public:
     }
 
     const glm::mat4x4& GetWorldTrans(){
+    
         m_Wtransformation = worldTrans.GetMatrix();
+#ifdef IS_DEBUG
+        std::cout << "W.m_pos" << " ";
+        PrintGLMVec3(worldTrans.m_pos);
+        std::cout << "W.m_rotation" << " ";
+        PrintGLMVec3(worldTrans.m_rotation);
+        std::cout << "W.m_scale" << " ";
+        PrintGLMVec3(worldTrans.m_scale);
+        std::cout << "W.m_Wtransformation" << " ";
+        PrintGLMMat4x4(m_Wtransformation);
+#endif
         return m_Wtransformation;
     }
     const glm::mat4x4& GetViewTrans(){

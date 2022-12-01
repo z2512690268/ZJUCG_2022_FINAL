@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <iostream>
 #include "camera.h"
 #include "mathfunc.h"
 
@@ -93,27 +94,27 @@ void Camera::Init()
 }
 
 
-bool Camera::OnKeyboard(KEY_ENUM Key)
+bool Camera::OnKeyboard(int Key)
 {
     bool Ret = false;
 
     switch (Key) {
 
-    case KEY_UP:
+    case GLUT_KEY_UP:
         {
             m_pos += (m_target * STEP_SCALE);
             Ret = true;
         }
         break;
 
-    case KEY_DOWN:
+    case GLUT_KEY_DOWN:
         {
             m_pos -= (m_target * STEP_SCALE);
             Ret = true;
         }
         break;
 
-    case KEY_LEFT:
+    case GLUT_KEY_LEFT:
         {
             glm::vec3 Left = glm::cross(m_target, m_up);
             glm::normalize(Left);
@@ -123,7 +124,7 @@ bool Camera::OnKeyboard(KEY_ENUM Key)
         }
         break;
 
-    case KEY_RIGHT:
+    case GLUT_KEY_RIGHT:
         {
             glm::vec3 Right = glm::cross(m_up, m_target);
             glm::normalize(Right);
@@ -133,11 +134,11 @@ bool Camera::OnKeyboard(KEY_ENUM Key)
         }
         break;
         
-    case KEY_PAGE_UP:
+    case GLUT_KEY_PAGE_UP:
         m_pos.y += STEP_SCALE;
         break;
     
-    case KEY_PAGE_DOWN:
+    case GLUT_KEY_PAGE_DOWN:
         m_pos.y -= STEP_SCALE;
         break;
     
@@ -151,6 +152,9 @@ bool Camera::OnKeyboard(KEY_ENUM Key)
 
 void Camera::OnMouse(int x, int y)
 {
+
+    std::cout << "x: " << x << " y: " << y << std::endl;
+
     const int DeltaX = x - m_mousePos.x;
     const int DeltaY = y - m_mousePos.y;
 
