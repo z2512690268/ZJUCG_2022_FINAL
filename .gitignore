@@ -2,4 +2,5 @@
 .vscode
 x64
 build.bat
+buildtest.bat
 Makefile
