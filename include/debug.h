@@ -19,4 +19,8 @@ void PrintGLMMat4x4(const glm::mat4x4& mat4x4){
     std::cout << "m30: " << mat4x4[3][0] << " m31: " << mat4x4[3][1] << " m32: " << mat4x4[3][2] << " m33: " << mat4x4[3][3] << std::endl;
 }
 
+void PrintGLMQuternion(const glm::quat& quat){
+    std::cout << "x: " << quat.x << " y: " << quat.y << " z: " << quat.z << " w: " << quat.w << std::endl;
+}
+
 #endif

@@ -152,9 +152,6 @@ bool Camera::OnKeyboard(int Key)
 
 void Camera::OnMouse(int x, int y)
 {
-
-    std::cout << "x: " << x << " y: " << y << std::endl;
-
     const int DeltaX = x - m_mousePos.x;
     const int DeltaY = y - m_mousePos.y;
 
@@ -233,14 +230,13 @@ void Camera::Update()
 
     // Rotate the view vector by the horizontal angle around the vertical axis
     glm::vec3 View(1.0f, 0.0f, 0.0f);
-    RotateVectorByQuaternion(View, m_AngleH, Vaxis);    
+    View = RotateVectorByQuaternion(View, m_AngleH, Vaxis);    
 
     glm::normalize(View);
-
     // Rotate the view vector by the vertical angle around the horizontal axis
     glm::vec3 Haxis = glm::cross(Vaxis, View);
     glm::normalize(Haxis);
-    RotateVectorByQuaternion(View, m_AngleV, Haxis);
+    View = RotateVectorByQuaternion(View, m_AngleV, Haxis);
 
     m_target = View;
     glm::normalize(m_target);
