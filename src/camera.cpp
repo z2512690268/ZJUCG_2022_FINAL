@@ -1,26 +1,9 @@
-/*
-
-	Copyright 2010 Etay Meiri
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #include <iostream>
 #include "camera.h"
 #include "mathfunc.h"
+#include "callback.h"
 
-const static float STEP_SCALE = 0.2;
+const static float STEP_SCALE = 0.2f;
 const static float EDGE_STEP = 1.5f;
 const static int MARGIN = 10;
 
@@ -93,39 +76,39 @@ void Camera::Init()
 }
 
 
-bool Camera::OnSpecialKey(int Key)
+bool Camera::OnSpecialKey(CALLBACK_KEY Key)
 {
     bool Ret = false;
 
     switch (Key) {
 
-    case GLUT_KEY_UP:
-        OnKeyboard('w');
+    case CALLBACK_KEY_UP:
+        OnKeyboard(CALLBACK_KEY_w);
         Ret = true;
         break;
 
-    case GLUT_KEY_DOWN:
-        OnKeyboard('s');
+    case CALLBACK_KEY_DOWN:
+        OnKeyboard(CALLBACK_KEY_s);
         Ret = true;
         break;
 
-    case GLUT_KEY_LEFT:
-        OnKeyboard('a');
+    case CALLBACK_KEY_LEFT:
+        OnKeyboard(CALLBACK_KEY_a);
         Ret = true;
         break;
 
-    case GLUT_KEY_RIGHT:
-        OnKeyboard('d');
+    case CALLBACK_KEY_RIGHT:
+        OnKeyboard(CALLBACK_KEY_d);
         Ret = true;
         break;
         
-    case GLUT_KEY_PAGE_UP:
-        OnKeyboard('z');
+    case CALLBACK_KEY_PAGE_UP:
+        OnKeyboard(CALLBACK_KEY_z);
         Ret = true;
         break;
     
-    case GLUT_KEY_PAGE_DOWN:
-        OnKeyboard('c');
+    case CALLBACK_KEY_PAGE_DOWN:
+        OnKeyboard(CALLBACK_KEY_c);
         Ret = true;
         break;
     
@@ -136,40 +119,40 @@ bool Camera::OnSpecialKey(int Key)
     return Ret;
 }
 
-bool Camera::OnKeyboard(int Key) {
+bool Camera::OnKeyboard(CALLBACK_KEY Key) {
     bool Ret = false;
     switch (Key) {
-    case 'w':
+    case CALLBACK_KEY_w:
         m_pos += (m_target * STEP_SCALE);
         Ret = true;
         break;
-    case 's':
+    case CALLBACK_KEY_s:
         m_pos -= (m_target * STEP_SCALE);
         Ret = true;
         break;
-    case 'a':
+    case CALLBACK_KEY_a:
         glm::vec3 Left = glm::cross(m_target, m_up);
         glm::normalize(Left);
         Left *= STEP_SCALE;
         m_pos += Left;
         Ret = true;
         break;
-    case 'd':
+    case CALLBACK_KEY_d:
         glm::vec3 Right = glm::cross(m_up, m_target);
         glm::normalize(Right);
         Right *= STEP_SCALE;
         m_pos += Right;
         Ret = true;
         break;
-    case 'z': // space
+    case CALLBACK_KEY_z: // space
         m_pos.y += STEP_SCALE;
         Ret = true;
         break;
-    case 'c':
+    case CALLBACK_KEY_c:
         m_pos.y -= STEP_SCALE;
         Ret = true;
         break;
-    case 'r':
+    case CALLBACK_KEY_r:
         m_pos          = glm::vec3(0.0f, 0.0f, 0.0f);
         m_target       = glm::vec3(0.0f, 0.0f, 1.0f);
         m_up           = glm::vec3(0.0f, 1.0f, 0.0f);

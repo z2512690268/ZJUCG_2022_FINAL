@@ -3,6 +3,7 @@
 
 
 #include "mathfunc.h"
+#include "callback.h"
 #include <GL/freeglut.h>
 
 class Camera
@@ -13,9 +14,9 @@ public:
 
     Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
 
-    bool OnSpecialKey(int Key);
+    bool OnSpecialKey(CALLBACK_KEY Key);
 
-    bool OnKeyboard(int Key);
+    bool OnKeyboard(CALLBACK_KEY Key);
     
     void OnMouse(int x, int y);
 
