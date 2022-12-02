@@ -17,9 +17,7 @@ public:
         Color = glm::vec3(0.0f, 0.0f, 0.0f);
         AmbientIntensity = 0.0f;
         DiffuseIntensity = 0.0f;
-    }
-        
-   // virtual void AddToATB(TwBar *bar);
+    }      
 };
 
 
@@ -32,8 +30,6 @@ public:
     {
         Direction = glm::vec3(0.0f, 0.0f, 0.0f);
     }
-    
-   // virtual void AddToATB(TwBar *bar);
 };
 
 
@@ -97,15 +93,22 @@ public:
     virtual bool Init();
 
     void SetWVP(const glm::mat4x4& WVP);
+    void SetWorldMatrix(const glm::mat4x4& WVP);
     void SetTextureUnit(unsigned int TextureUnit);
     void SetDirectionalLight(const DirectionalLight& Light);
 
 private:
 
     GLuint m_WVPLocation;
+    GLuint m_WorldMatrixLocation;
     GLuint m_samplerLocation;
-    GLuint m_dirLightColorLocation;
-    GLuint m_dirLightAmbientIntensityLocation;
+
+    struct {
+        GLuint Color;
+        GLuint AmbientIntensity;
+        GLuint Direction;
+        GLuint DiffuseIntensity;
+    } m_dirLightLocation;
 };
 
 
