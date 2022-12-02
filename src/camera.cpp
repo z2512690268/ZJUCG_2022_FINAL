@@ -3,7 +3,7 @@
 #include "mathfunc.h"
 #include "callback.h"
 
-const static float STEP_SCALE = 0.2f;
+const static float STEP_SCALE = 0.1f;
 const static float EDGE_STEP = 1.5f;
 const static int MARGIN = 10;
 
@@ -71,65 +71,22 @@ void Camera::Init()
     m_OnRightEdge = false;
     m_mousePos.x  = m_windowWidth / 2;
     m_mousePos.y  = m_windowHeight / 2;
-
-   // glutWarpPointer(m_mousePos.x, m_mousePos.y);
-}
-
-
-bool Camera::OnSpecialKey(CALLBACK_KEY Key)
-{
-    bool Ret = false;
-
-    switch (Key) {
-
-    case CALLBACK_KEY_UP:
-        OnKeyboard(CALLBACK_KEY_w);
-        Ret = true;
-        break;
-
-    case CALLBACK_KEY_DOWN:
-        OnKeyboard(CALLBACK_KEY_s);
-        Ret = true;
-        break;
-
-    case CALLBACK_KEY_LEFT:
-        OnKeyboard(CALLBACK_KEY_a);
-        Ret = true;
-        break;
-
-    case CALLBACK_KEY_RIGHT:
-        OnKeyboard(CALLBACK_KEY_d);
-        Ret = true;
-        break;
-        
-    case CALLBACK_KEY_PAGE_UP:
-        OnKeyboard(CALLBACK_KEY_z);
-        Ret = true;
-        break;
-    
-    case CALLBACK_KEY_PAGE_DOWN:
-        OnKeyboard(CALLBACK_KEY_c);
-        Ret = true;
-        break;
-    
-    default: 
-        break;            
-    }
-
-    return Ret;
 }
 
 bool Camera::OnKeyboard(CALLBACK_KEY Key) {
     bool Ret = false;
     switch (Key) {
+    case CALLBACK_KEY_UP:
     case CALLBACK_KEY_w:
         m_pos += (m_target * STEP_SCALE);
         Ret = true;
         break;
+    case CALLBACK_KEY_DOWN:
     case CALLBACK_KEY_s:
         m_pos -= (m_target * STEP_SCALE);
         Ret = true;
         break;
+    case CALLBACK_KEY_LEFT:
     case CALLBACK_KEY_a:
         glm::vec3 Left = glm::cross(m_target, m_up);
         glm::normalize(Left);
@@ -137,6 +94,7 @@ bool Camera::OnKeyboard(CALLBACK_KEY Key) {
         m_pos += Left;
         Ret = true;
         break;
+    case CALLBACK_KEY_RIGHT:
     case CALLBACK_KEY_d:
         glm::vec3 Right = glm::cross(m_up, m_target);
         glm::normalize(Right);
@@ -144,10 +102,12 @@ bool Camera::OnKeyboard(CALLBACK_KEY Key) {
         m_pos += Right;
         Ret = true;
         break;
+    case CALLBACK_KEY_PAGE_UP:
     case CALLBACK_KEY_z: // space
         m_pos.y += STEP_SCALE;
         Ret = true;
         break;
+    case CALLBACK_KEY_PAGE_DOWN:
     case CALLBACK_KEY_c:
         m_pos.y -= STEP_SCALE;
         Ret = true;

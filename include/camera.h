@@ -14,7 +14,10 @@ public:
 
     Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
 
-    bool OnSpecialKey(CALLBACK_KEY Key);
+    void SetICallback(ICallbacks* pCallback) 
+    { 
+        m_pCallbacks = pCallback; 
+    }
 
     bool OnKeyboard(CALLBACK_KEY Key);
     
@@ -72,6 +75,7 @@ private:
     bool m_OnRightEdge;
 
     glm::ivec2 m_mousePos;
+    ICallbacks* m_pCallbacks;
 };
 
 #endif	/* CAMERA_H */
