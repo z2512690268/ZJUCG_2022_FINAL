@@ -59,7 +59,6 @@ public:
         Position = glm::vec3(0.0f, 0.0f, 0.0f);
     }
     
-  //  virtual void AddToATB(TwBar *bar);
 };
 
 
@@ -75,7 +74,6 @@ public:
         Cutoff = 0.0f;
     }
     
-  //  virtual void AddToATB(TwBar *bar);
 };
 
 #define COLOR_WHITE glm::vec3(1.0f, 1.0f, 1.0f)
@@ -96,12 +94,18 @@ public:
     void SetWorldMatrix(const glm::mat4x4& WVP);
     void SetTextureUnit(unsigned int TextureUnit);
     void SetDirectionalLight(const DirectionalLight& Light);
+    void SetEyeWorldPos(const glm::vec3& EyeWorldPos);
+    void SetMatSpecularIntensity(float Intensity);
+    void SetMatSpecularPower(float Power);
 
 private:
 
     GLuint m_WVPLocation;
     GLuint m_WorldMatrixLocation;
     GLuint m_samplerLocation;
+    GLuint m_eyeWorldPosLocation;
+    GLuint m_matSpecularIntensityLocation;
+    GLuint m_matSpecularPowerLocation;
 
     struct {
         GLuint Color;

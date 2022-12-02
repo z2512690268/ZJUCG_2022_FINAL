@@ -31,6 +31,10 @@ Camera::Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const gl
     m_up = Up;
     glm::normalize(m_up);
 
+    initPos = m_pos;
+    initTarget = m_target;
+    initUp = m_up;
+
     Init();
 }
 
@@ -113,9 +117,9 @@ bool Camera::OnKeyboard(CALLBACK_KEY Key) {
         Ret = true;
         break;
     case CALLBACK_KEY_r:
-        m_pos          = glm::vec3(0.0f, 0.0f, 0.0f);
-        m_target       = glm::vec3(0.0f, 0.0f, 1.0f);
-        m_up           = glm::vec3(0.0f, 1.0f, 0.0f);
+        m_pos          = initPos;
+        m_target       = initTarget;
+        m_up           = initUp;
 
         Init();
         Ret = true;
