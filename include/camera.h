@@ -59,6 +59,10 @@ private:
     void Init();
     void Update();
 
+    glm::vec3 initPos;
+    glm::vec3 initTarget;
+    glm::vec3 initUp;
+
     glm::vec3 m_pos;
     glm::vec3 m_target;
     glm::vec3 m_up;

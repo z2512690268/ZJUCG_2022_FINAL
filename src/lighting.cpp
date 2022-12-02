@@ -71,3 +71,18 @@ void LightingTechnique::SetDirectionalLight(const DirectionalLight& Light)
     glUniform3f(m_dirLightLocation.Direction, Direction.x, Direction.y, Direction.z);
     glUniform1f(m_dirLightLocation.DiffuseIntensity, Light.DiffuseIntensity);
 }
+
+void LightingTechnique::SetEyeWorldPos(const glm::vec3& EyeWorldPos)
+{
+    glUniform3f(m_eyeWorldPosLocation, EyeWorldPos.x, EyeWorldPos.y, EyeWorldPos.z);
+}
+
+void LightingTechnique::SetMatSpecularIntensity(float Intensity)
+{
+    glUniform1f(m_matSpecularIntensityLocation, Intensity);
+}
+
+void LightingTechnique::SetMatSpecularPower(float Power)
+{
+    glUniform1f(m_matSpecularPowerLocation, Power);
+}
