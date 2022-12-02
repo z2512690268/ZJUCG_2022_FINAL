@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>E:\myE\ZJU\2022_3_up\graphics\final\Final\packages\stb\include;$(IncludePath)</IncludePath>
+    <IncludePath>packages\stb\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup />
