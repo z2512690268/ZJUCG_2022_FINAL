@@ -23,15 +23,20 @@ bool LightingTechnique::Init()
     }
 
     m_WVPLocation = GetUniformLocation("gWVP");
+    m_WorldMatrixLocation = GetUniformLocation("gWorld");
     m_samplerLocation = GetUniformLocation("gSampler");
-    m_dirLightColorLocation = GetUniformLocation("gDirectionalLight.Color");
-    m_dirLightAmbientIntensityLocation = GetUniformLocation("gDirectionalLight.AmbientIntensity");
+    m_dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Color");
+    m_dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.AmbientIntensity");
+    m_dirLightLocation.Direction = GetUniformLocation("gDirectionalLight.Direction");
+    m_dirLightLocation.DiffuseIntensity = GetUniformLocation("gDirectionalLight.DiffuseIntensity");
 
-    if (m_dirLightAmbientIntensityLocation == 0xFFFFFFFF ||
+    if (m_dirLightLocation.AmbientIntensity == 0xFFFFFFFF ||
         m_WVPLocation == 0xFFFFFFFF ||
+        m_WorldMatrixLocation == 0xFFFFFFFF ||
         m_samplerLocation == 0xFFFFFFFF ||
-        m_dirLightColorLocation == 0xFFFFFFFF)
-    {
+        m_dirLightLocation.Color == 0xFFFFFFFF ||
+        m_dirLightLocation.DiffuseIntensity == 0xFFFFFFFF ||
+        m_dirLightLocation.Direction == 0xFFFFFFFF) {
         return false;
     }
 
@@ -44,6 +49,12 @@ void LightingTechnique::SetWVP(const glm::mat4x4& WVP)
 }
 
 
+void LightingTechnique::SetWorldMatrix(const glm::mat4x4& WorldInverse)
+{
+    glUniformMatrix4fv(m_WorldMatrixLocation, 1, GL_TRUE, (const GLfloat*)&WorldInverse);
+}
+
+
 void LightingTechnique::SetTextureUnit(unsigned int TextureUnit)
 {
     glUniform1i(m_samplerLocation, TextureUnit);
@@ -52,6 +63,11 @@ void LightingTechnique::SetTextureUnit(unsigned int TextureUnit)
 
 void LightingTechnique::SetDirectionalLight(const DirectionalLight& Light)
 {
-    glUniform3f(m_dirLightColorLocation, Light.Color.x, Light.Color.y, Light.Color.z);
-    glUniform1f(m_dirLightAmbientIntensityLocation, Light.AmbientIntensity);
+    glUniform3f(m_dirLightLocation.Color, Light.Color.x, Light.Color.y, Light.Color.z);
+    glUniform1f(m_dirLightLocation.AmbientIntensity, Light.AmbientIntensity);
+    glm::vec3 Direction = Light.Direction;
+    glm::normalize(Direction);
+
+    glUniform3f(m_dirLightLocation.Direction, Direction.x, Direction.y, Direction.z);
+    glUniform1f(m_dirLightLocation.DiffuseIntensity, Light.DiffuseIntensity);
 }

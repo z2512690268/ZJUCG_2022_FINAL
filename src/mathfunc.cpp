@@ -1,6 +1,5 @@
 #include "mathfunc.h"
 
-// 直接相乘即为旋转，参考https://www.zhihu.com/question/37710539
 glm::vec3 RotateVectorByQuaternion(const glm::vec3& Vector, const float Angle, const glm::vec3& Axis)
 {
     glm::quat RotationQ = glm::angleAxis(glm::radians(Angle), Axis);
@@ -9,4 +8,10 @@ glm::vec3 RotateVectorByQuaternion(const glm::vec3& Vector, const float Angle, c
 
     glm::quat W = RotationQ * VectorQ * ConjugateQ;
     return glm::vec3(W.x, W.y, W.z);
+}
+
+glm::vec3 CalculateNormal(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3)
+{
+    glm::vec3 v = glm::cross(v2 - v1, v3 - v1);
+    return glm::normalize(v);
 }
