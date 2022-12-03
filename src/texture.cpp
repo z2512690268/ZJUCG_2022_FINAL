@@ -151,7 +151,7 @@ bool CubemapTexture::Load()
     glGenTextures(1, &m_textureObj);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureObj);
 
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load(0);
 
     for (unsigned int i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(types) ; i++) {
         int Width, Height;

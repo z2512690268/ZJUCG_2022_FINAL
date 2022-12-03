@@ -77,7 +77,7 @@ bool SkyBox::Init(const std::string& Directory,
                   const std::string& NegZFilename)
 {
     m_pSkyboxTechnique = new SkyboxTechnique();
-
+    
     if (!m_pSkyboxTechnique->Init()) {
         printf("Error initializing the skybox technique\n");
         return false;
@@ -121,8 +121,10 @@ void SkyBox::Render()
     p.Rotate(0.0f, 0.0f, 0.0f);
     p.Translate(m_pCamera->GetPos().x, m_pCamera->GetPos().y, m_pCamera->GetPos().z);
     p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+
     p.SetPerspectiveProj(m_persProjInfo);
     m_pSkyboxTechnique->SetWVP(p.GetWVPTrans());
+
     m_pCubemapTex->Bind(GL_TEXTURE0);
     m_pMesh->Render();
 
