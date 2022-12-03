@@ -4,7 +4,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <IncludePath>packages\assimp;$(IncludePath)</IncludePath>
+    <LibraryPath>packages\assimp\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <ItemDefinitionGroup />
-  <ItemGroup />
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+   <None Include="packages\assimp\dll\assimp-vc143-mt.dll">
+      <Link>assimp-vc143-mt.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+   </None>
+</ItemGroup>
+
 </Project>
