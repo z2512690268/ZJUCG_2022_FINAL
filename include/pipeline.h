@@ -3,7 +3,7 @@
 
 #include "mathfunc.h"
 #include "camera.h"
-#include "debug.h"
+
 struct PersParam
 {
     float FOV;
