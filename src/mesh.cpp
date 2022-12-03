@@ -27,6 +27,7 @@ MeshEntry::~MeshEntry()
 void MeshEntry::Init(const std::vector<Vertex>& Vertices,
                           const std::vector<unsigned int>& Indices)
 {
+    printf("AA %d %d %d\n", Vertices.size(), Indices.size(), sizeof(Vertex));
     NumIndices = Indices.size();
 
     glGenBuffers(1, &VB);
@@ -36,6 +37,8 @@ void MeshEntry::Init(const std::vector<Vertex>& Vertices,
     glGenBuffers(1, &IB);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * NumIndices, &Indices[0], GL_STATIC_DRAW);
+
+    printf("BB %d %d %d\n", VB, IB, NumIndices);
 }
 
 Mesh::Mesh()
@@ -228,8 +231,12 @@ int Mesh::AddMeshEntry(const std::vector<Vertex>& Vertices,
     MeshEntry Entry;
     Entry.Init(Vertices, Indices);
     Entry.MaterialIndex = MaterialIndex;
-    
+
     m_Entries.push_back(Entry);
+
+    printf("CC %d %d %d\n", m_Entries[0].VB, m_Entries[0].IB, m_Entries[0].NumIndices);
+
+    printf("DD %d %d %d\n", m_Entries.size(), m_Textures.size(), m_Entries[0].MaterialIndex);
 
     return m_Entries.size() - 1;
 }
