@@ -71,7 +71,7 @@ private:
     bool InitMaterials(const aiScene* pScene, const std::string& Filename);
     void Clear();
 
-    std::vector<MeshEntry> m_Entries;
+    std::vector<MeshEntry*> m_Entries;
     std::vector<Texture*> m_Textures;
 };
 
