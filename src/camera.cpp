@@ -79,15 +79,20 @@ void Camera::Init()
 
 bool Camera::OnKeyboard(CALLBACK_KEY Key) {
     bool Ret = false;
+    glm::vec3 Direction = m_target;
     switch (Key) {
     case CALLBACK_KEY_UP:
     case CALLBACK_KEY_w:
-        m_pos += (m_target * STEP_SCALE);
+        Direction.y = 0.0f;
+        glm::normalize(Direction);
+        m_pos += (Direction * STEP_SCALE);
         Ret = true;
         break;
     case CALLBACK_KEY_DOWN:
     case CALLBACK_KEY_s:
-        m_pos -= (m_target * STEP_SCALE);
+        Direction.y = 0.0f;
+        glm::normalize(Direction);
+        m_pos -= (Direction * STEP_SCALE);
         Ret = true;
         break;
     case CALLBACK_KEY_LEFT:
