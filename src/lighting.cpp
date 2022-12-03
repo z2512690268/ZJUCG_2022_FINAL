@@ -25,18 +25,61 @@ bool LightingTechnique::Init()
     m_WVPLocation = GetUniformLocation("gWVP");
     m_WorldMatrixLocation = GetUniformLocation("gWorld");
     m_samplerLocation = GetUniformLocation("gSampler");
-    m_dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Color");
-    m_dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.AmbientIntensity");
+    m_eyeWorldPosLocation = GetUniformLocation("gEyeWorldPos");
+    m_dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Base.Color");
+    m_dirLightLocation.AmbientIntensity = GetUniformLocation("gDirectionalLight.Base.AmbientIntensity");
     m_dirLightLocation.Direction = GetUniformLocation("gDirectionalLight.Direction");
-    m_dirLightLocation.DiffuseIntensity = GetUniformLocation("gDirectionalLight.DiffuseIntensity");
+    m_dirLightLocation.DiffuseIntensity = GetUniformLocation("gDirectionalLight.Base.DiffuseIntensity");
+    m_matSpecularIntensityLocation = GetUniformLocation("gMatSpecularIntensity");
+    m_matSpecularPowerLocation = GetUniformLocation("gSpecularPower");
+    m_numPointLightsLocation = GetUniformLocation("gNumPointLights");
 
+    for (unsigned int i = 0 ; i < sizeof(m_pointLightsLocation) / sizeof(m_pointLightsLocation[0]); i++) {
+        char Name[128];
+        memset(Name, 0, sizeof(Name));
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.Color", i);
+        m_pointLightsLocation[i].Color = GetUniformLocation(Name);
+
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.AmbientIntensity", i);
+        m_pointLightsLocation[i].AmbientIntensity = GetUniformLocation(Name);
+
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Position", i);
+        m_pointLightsLocation[i].Position = GetUniformLocation(Name);
+
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Base.DiffuseIntensity", i);
+        m_pointLightsLocation[i].DiffuseIntensity = GetUniformLocation(Name);
+
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Constant", i);
+        m_pointLightsLocation[i].Atten.Constant = GetUniformLocation(Name);
+
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Linear", i);
+        m_pointLightsLocation[i].Atten.Linear = GetUniformLocation(Name);
+
+        sprintf_s(Name, sizeof(Name), "gPointLights[%d].Atten.Exp", i);
+        m_pointLightsLocation[i].Atten.Exp = GetUniformLocation(Name);
+
+        if (m_pointLightsLocation[i].Color == 0xFFFFFFFF ||
+            m_pointLightsLocation[i].AmbientIntensity == 0xFFFFFFFF ||
+            m_pointLightsLocation[i].Position == 0xFFFFFFFF ||
+            m_pointLightsLocation[i].DiffuseIntensity == 0xFFFFFFFF ||
+            m_pointLightsLocation[i].Atten.Constant == 0xFFFFFFFF ||
+            m_pointLightsLocation[i].Atten.Linear == 0xFFFFFFFF ||
+            m_pointLightsLocation[i].Atten.Exp == 0xFFFFFFFF) {
+            return false;
+        }
+    }
+    
     if (m_dirLightLocation.AmbientIntensity == 0xFFFFFFFF ||
         m_WVPLocation == 0xFFFFFFFF ||
         m_WorldMatrixLocation == 0xFFFFFFFF ||
         m_samplerLocation == 0xFFFFFFFF ||
+        m_eyeWorldPosLocation == 0xFFFFFFFF ||
         m_dirLightLocation.Color == 0xFFFFFFFF ||
         m_dirLightLocation.DiffuseIntensity == 0xFFFFFFFF ||
-        m_dirLightLocation.Direction == 0xFFFFFFFF) {
+        m_dirLightLocation.Direction == 0xFFFFFFFF ||
+        m_matSpecularIntensityLocation == 0xFFFFFFFF ||
+        m_matSpecularPowerLocation == 0xFFFFFFFF ||
+        m_numPointLightsLocation == 0xFFFFFFFF) {
         return false;
     }
 
@@ -86,3 +129,20 @@ void LightingTechnique::SetMatSpecularPower(float Power)
 {
     glUniform1f(m_matSpecularPowerLocation, Power);
 }
+
+void LightingTechnique::SetPointLights(unsigned int NumLights, const PointLight* pLights)
+{
+    glUniform1i(m_numPointLightsLocation, NumLights);
+    
+    for (unsigned int i = 0 ; i < NumLights ; i++) {
+        glUniform3f(m_pointLightsLocation[i].Color, pLights[i].Color.x, pLights[i].Color.y, pLights[i].Color.z);
+        glUniform1f(m_pointLightsLocation[i].AmbientIntensity, pLights[i].AmbientIntensity);
+        glUniform1f(m_pointLightsLocation[i].DiffuseIntensity, pLights[i].DiffuseIntensity);
+        glUniform3f(m_pointLightsLocation[i].Position, pLights[i].Position.x, pLights[i].Position.y, pLights[i].Position.z);
+        glUniform1f(m_pointLightsLocation[i].Atten.Constant, pLights[i].Attenuation.Constant);
+        glUniform1f(m_pointLightsLocation[i].Atten.Linear, pLights[i].Attenuation.Linear);
+        glUniform1f(m_pointLightsLocation[i].Atten.Exp, pLights[i].Attenuation.Exp);
+    }
+}
+
+

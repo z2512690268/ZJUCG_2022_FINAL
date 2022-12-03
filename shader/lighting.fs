@@ -1,55 +1,97 @@
 #version 330
 
+const int MAX_POINT_LIGHTS = 2;
+
 in vec2 TexCoord0;
 in vec3 Normal0;
 in vec3 WorldPos0;  
 
 out vec4 FragColor;
 
-struct DirectionalLight {
+struct BaseLight {
     vec3 Color;
     float AmbientIntensity;
     float DiffuseIntensity;
+};
+
+struct DirectionalLight {
+    BaseLight Base;
     vec3 Direction;
 };
 
+struct Attenuation {
+    float Constant;
+    float Linear;
+    float Exp;
+};
+
+struct PointLight {
+    BaseLight Base;
+    vec3 Position;
+    Attenuation Atten;
+};
+
+uniform int gNumPointLights;
 uniform DirectionalLight gDirectionalLight;
+uniform PointLight gPointLights[MAX_POINT_LIGHTS];
 uniform sampler2D gSampler;                                                         
 uniform vec3 gEyeWorldPos;                                                          
 uniform float gMatSpecularIntensity;                                                
 uniform float gSpecularPower;    
 
-void main() {
+vec4 CalcLightInternal(BaseLight Light, vec3 LightDirection, vec3 Normal) {
     // 环境光=颜色*强度
-    vec4 AmbientColor = vec4(gDirectionalLight.Color *
-        gDirectionalLight.AmbientIntensity, 1.0f);
-    
-    // 漫反射因子
-    vec3 LightDirection = -gDirectionalLight.Direction;                             
-    vec3 Normal = normalize(Normal0);  
-    float DiffuseFactor = dot(Normal, LightDirection);
+    vec4 AmbientColor = vec4(Light.Color * Light.AmbientIntensity, 1.0f);
 
-    // 有反射条件下：漫反射+镜面反射，套公式
+    // 漫反射因子
+    float DiffuseFactor = dot(Normal, -LightDirection);
+
+  // 有反射条件下：漫反射+镜面反射，套公式
     vec4 DiffuseColor = vec4(0, 0, 0, 0);
     vec4 SpecularColor = vec4(0, 0, 0, 0);
     if(DiffuseFactor > 0) {
         // 漫反射色
-        DiffuseColor = vec4(
-        gDirectionalLight.Color * 
-            gDirectionalLight.DiffuseIntensity * DiffuseFactor,
+        DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor,
          1.0f);
         
         // 镜面反射因子
         vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos0);                     
-        vec3 LightReflect = normalize(reflect(gDirectionalLight.Direction, Normal));
+        vec3 LightReflect = normalize(reflect(LightDirection, Normal));
         float SpecularFactor = dot(VertexToEye, LightReflect);      
         if (SpecularFactor > 0) {    
             // 镜面反射色                                               
             SpecularFactor = pow(SpecularFactor, gSpecularPower);
-            SpecularColor = vec4(gDirectionalLight.Color * gMatSpecularIntensity * SpecularFactor, 1.0f);
+            SpecularColor = vec4(Light.Color * gMatSpecularIntensity * SpecularFactor, 1.0f);
         }      
     }
-    // 直接光照色+散射光照色
-    FragColor = texture2D(gSampler, TexCoord0.xy) *
-        (AmbientColor + DiffuseColor  + SpecularColor);
+    return (AmbientColor + DiffuseColor + SpecularColor);
+}
+
+vec4 CalcPointLight(int Index, vec3 Normal) {
+    vec3 LightDirection = WorldPos0 - gPointLights[Index].Position;
+    float Distance = length(LightDirection);
+    LightDirection = normalize(LightDirection);
+
+    vec4 Color = CalcLightInternal(gPointLights[Index].Base, LightDirection, Normal);
+    float AttenuationFactor = gPointLights[Index].Atten.Constant +
+        gPointLights[Index].Atten.Linear * Distance +
+        gPointLights[Index].Atten.Exp * Distance * Distance;
+
+    return Color / AttenuationFactor;
+}
+
+
+vec4 CalcDirectionalLight(vec3 Normal) {
+    return CalcLightInternal(gDirectionalLight.Base, gDirectionalLight.Direction, Normal);
+}
+
+void main() {
+    vec3 Normal = normalize(Normal0);
+    vec4 TotalLight = CalcDirectionalLight(Normal);
+
+    for(int i = 0; i < gNumPointLights; i++) {
+        TotalLight += CalcPointLight(i, Normal);
+    }
+
+    FragColor = texture2D(gSampler, TexCoord0.xy) * TotalLight;    
 }

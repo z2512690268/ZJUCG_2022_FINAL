@@ -86,6 +86,8 @@ class LightingTechnique : public Technique
 {
 public:
 
+    static const unsigned int MAX_POINT_LIGHTS = 2;
+
     LightingTechnique();
 
     virtual bool Init();
@@ -94,6 +96,7 @@ public:
     void SetWorldMatrix(const glm::mat4x4& WVP);
     void SetTextureUnit(unsigned int TextureUnit);
     void SetDirectionalLight(const DirectionalLight& Light);
+    void SetPointLights(unsigned int NumLights, const PointLight* pLights);
     void SetEyeWorldPos(const glm::vec3& EyeWorldPos);
     void SetMatSpecularIntensity(float Intensity);
     void SetMatSpecularPower(float Power);
@@ -106,6 +109,7 @@ private:
     GLuint m_eyeWorldPosLocation;
     GLuint m_matSpecularIntensityLocation;
     GLuint m_matSpecularPowerLocation;
+    GLuint m_numPointLightsLocation;
 
     struct {
         GLuint Color;
@@ -113,6 +117,19 @@ private:
         GLuint Direction;
         GLuint DiffuseIntensity;
     } m_dirLightLocation;
+
+    struct {
+        GLuint Color;
+        GLuint AmbientIntensity;
+        GLuint DiffuseIntensity;
+        GLuint Position;
+        struct
+        {
+            GLuint Constant;
+            GLuint Linear;
+            GLuint Exp;
+        } Atten;
+    } m_pointLightsLocation[MAX_POINT_LIGHTS];
 };
 
 
