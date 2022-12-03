@@ -1,10 +1,11 @@
 #version 330
 
 const int MAX_POINT_LIGHTS = 2;
+const int MAX_SPOT_LIGHTS = 2;
 
 in vec2 TexCoord0;
 in vec3 Normal0;
-in vec3 WorldPos0;  
+in vec3 WorldPos0;
 
 out vec4 FragColor;
 
@@ -31,13 +32,21 @@ struct PointLight {
     Attenuation Atten;
 };
 
+struct SpotLight {
+    PointLight Base;
+    vec3 Direction;
+    float Cutoff;
+};
+
 uniform int gNumPointLights;
+uniform int gNumSpotLights;
 uniform DirectionalLight gDirectionalLight;
 uniform PointLight gPointLights[MAX_POINT_LIGHTS];
-uniform sampler2D gSampler;                                                         
-uniform vec3 gEyeWorldPos;                                                          
-uniform float gMatSpecularIntensity;                                                
-uniform float gSpecularPower;    
+uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS];
+uniform sampler2D gSampler;
+uniform vec3 gEyeWorldPos;
+uniform float gMatSpecularIntensity;
+uniform float gSpecularPower;
 
 vec4 CalcLightInternal(BaseLight Light, vec3 LightDirection, vec3 Normal) {
     // 环境光=颜色*强度
@@ -51,38 +60,49 @@ vec4 CalcLightInternal(BaseLight Light, vec3 LightDirection, vec3 Normal) {
     vec4 SpecularColor = vec4(0, 0, 0, 0);
     if(DiffuseFactor > 0) {
         // 漫反射色
-        DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor,
-         1.0f);
-        
+        DiffuseColor = vec4(Light.Color * Light.DiffuseIntensity * DiffuseFactor, 1.0f);
+
         // 镜面反射因子
-        vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos0);                     
+        vec3 VertexToEye = normalize(gEyeWorldPos - WorldPos0);
         vec3 LightReflect = normalize(reflect(LightDirection, Normal));
-        float SpecularFactor = dot(VertexToEye, LightReflect);      
-        if (SpecularFactor > 0) {    
+        float SpecularFactor = dot(VertexToEye, LightReflect);
+        if(SpecularFactor > 0) {    
             // 镜面反射色                                               
             SpecularFactor = pow(SpecularFactor, gSpecularPower);
             SpecularColor = vec4(Light.Color * gMatSpecularIntensity * SpecularFactor, 1.0f);
-        }      
+        }
     }
     return (AmbientColor + DiffuseColor + SpecularColor);
 }
 
-vec4 CalcPointLight(int Index, vec3 Normal) {
-    vec3 LightDirection = WorldPos0 - gPointLights[Index].Position;
+vec4 CalcPointLight(PointLight l, vec3 Normal) {
+    vec3 LightDirection = WorldPos0 - l.Position;
     float Distance = length(LightDirection);
     LightDirection = normalize(LightDirection);
 
-    vec4 Color = CalcLightInternal(gPointLights[Index].Base, LightDirection, Normal);
-    float AttenuationFactor = gPointLights[Index].Atten.Constant +
-        gPointLights[Index].Atten.Linear * Distance +
-        gPointLights[Index].Atten.Exp * Distance * Distance;
+    vec4 Color = CalcLightInternal(l.Base, LightDirection, Normal);
+    float AttenuationFactor = l.Atten.Constant +
+        l.Atten.Linear * Distance +
+        l.Atten.Exp * Distance * Distance;
 
     return Color / AttenuationFactor;
 }
 
-
 vec4 CalcDirectionalLight(vec3 Normal) {
     return CalcLightInternal(gDirectionalLight.Base, gDirectionalLight.Direction, Normal);
+}
+
+vec4 CalcSpotLight(SpotLight l, vec3 Normal) {
+    vec3 LightToPixel = normalize(WorldPos0 - l.Base.Position);
+    float SpotFactor = dot(LightToPixel, l.Direction);
+
+    if(SpotFactor > l.Cutoff) {
+        vec4 Color = CalcPointLight(l.Base, Normal);
+        // CalcPointLight(l.Base, Normal);
+        return Color * (1.0 - (1.0 - SpotFactor) * 1.0 / (1.0 - l.Cutoff));
+    } else {
+        return vec4(0, 0, 0, 0);
+    }
 }
 
 void main() {
@@ -90,8 +110,12 @@ void main() {
     vec4 TotalLight = CalcDirectionalLight(Normal);
 
     for(int i = 0; i < gNumPointLights; i++) {
-        TotalLight += CalcPointLight(i, Normal);
+        TotalLight += CalcPointLight(gPointLights[i], Normal);
     }
 
-    FragColor = texture2D(gSampler, TexCoord0.xy) * TotalLight;    
+    for(int i = 0; i < gNumSpotLights; i++) {
+        TotalLight += CalcSpotLight(gSpotLights[i], Normal);
+    }
+
+    FragColor = texture2D(gSampler, TexCoord0.xy) * TotalLight;
 }
