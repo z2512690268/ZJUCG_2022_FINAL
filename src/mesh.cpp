@@ -1,7 +1,5 @@
 #include "mesh.h"
-
-#define INVALID_VALUE 0xFFFFFFFF
-#define SAFE_DELETE(p) { if (p) { delete p; p = NULL; } }
+#include "utils.h"
 
 MeshEntry::MeshEntry()
 {
