@@ -71,6 +71,7 @@
     <Import Project="packages\glm\glm.props" />
     <Import Project="packages\stb\stb.props" />
     <Import Project="packages\assimp\assimp.props" />
+    <Import Project="packages\imgui-v1.88\imgui.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -147,6 +148,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="packages\imgui-v1.88\backends\imgui_impl_glut.cpp" />
+    <ClCompile Include="packages\imgui-v1.88\backends\imgui_impl_opengl2.cpp" />
+    <ClCompile Include="packages\imgui-v1.88\imgui.cpp" />
+    <ClCompile Include="packages\imgui-v1.88\imgui_demo.cpp" />
+    <ClCompile Include="packages\imgui-v1.88\imgui_draw.cpp" />
+    <ClCompile Include="packages\imgui-v1.88\imgui_tables.cpp" />
+    <ClCompile Include="packages\imgui-v1.88\imgui_widgets.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>

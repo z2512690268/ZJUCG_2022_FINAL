@@ -13,12 +13,37 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{63d6014d-96c8-40f4-b42b-a0ff47d2175b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="packages\assimp\dll\assimp-vc143-mt.dll" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\callback.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\technique.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\skybox.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mathfunc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lighting.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\file.cpp">
@@ -27,26 +52,26 @@
     <ClCompile Include="src\camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\mathfunc.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\imgui_demo.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\texture.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\imgui_draw.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\callback.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\imgui_tables.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\lighting.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\technique.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\backends\imgui_impl_glut.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\mesh.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\backends\imgui_impl_opengl2.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\skybox.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="packages\imgui-v1.88\imgui.cpp">
+      <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
