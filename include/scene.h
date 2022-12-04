@@ -7,6 +7,9 @@
 #include "pipeline.h"
 #include "lighting.h"
 
+#include "imgui.h"
+#include "imgui_impl_glut.h"
+#include "imgui_impl_opengl2.h"
 #include <windows.h>
 #include <imm.h>
 #pragma comment (lib ,"imm32.lib")
@@ -63,6 +66,22 @@ public:
 
         // GLEW Init
         glewInit();
+
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
+
+        // Setup Platform/Renderer backends
+        // FIXME: Consider reworking this example to install our own GLUT funcs + forward calls ImGui_ImplGLUT_XXX ones, instead of using ImGui_ImplGLUT_InstallFuncs().
+        ImGui_ImplGLUT_Init();
+        ImGui_ImplGLUT_InstallFuncs();
+        ImGui_ImplOpenGL2_Init();
 
         // 禁用输入法
         HWND hWnd = GetActiveWindow();// 获取窗口句柄
