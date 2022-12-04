@@ -29,7 +29,7 @@ void Texture::Load(unsigned int BufferSize, void* pData)
 
 bool Texture::Load()
 {
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load(0);
 
     unsigned char* image_data = stbi_load(m_fileName.c_str(), &m_imageWidth, &m_imageHeight, &m_imageBPP, 0);
 
