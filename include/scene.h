@@ -67,7 +67,11 @@ public:
         }
         m_pBasicLight->Enable();
         m_pBasicLight->SetTextureUnit(0);
-    
+        m_pBasicLight->SetMatSpecularIntensity(0.0f);
+        m_pBasicLight->SetMatSpecularPower(0);
+        m_pBasicLight->SetPointLights(0, nullptr);
+        m_pBasicLight->SetSpotLights(0, nullptr);
+
         // init directionLight
         m_directionalLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
         m_directionalLight.AmbientIntensity = 0.0f;
