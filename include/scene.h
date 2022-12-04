@@ -117,6 +117,34 @@ public:
                     m_ret = 2;
                     glutLeaveMainLoop();
                     break;
+                case CALLBACK_KEY_3:
+                    m_ret = 3;
+                    glutLeaveMainLoop();
+                    break;
+                case CALLBACK_KEY_4:
+                    m_ret = 4;
+                    glutLeaveMainLoop();
+                    break;
+                case CALLBACK_KEY_5:
+                    m_ret = 5;
+                    glutLeaveMainLoop();
+                    break;
+                case CALLBACK_KEY_6:
+                    m_ret = 6;
+                    glutLeaveMainLoop();
+                    break;
+                case CALLBACK_KEY_7:
+                    m_ret = 7;
+                    glutLeaveMainLoop();
+                    break;
+                case CALLBACK_KEY_8:
+                    m_ret = 8;
+                    glutLeaveMainLoop();
+                    break;
+                case CALLBACK_KEY_9:
+                    m_ret = 9;
+                    glutLeaveMainLoop();
+                    break;
                 case CALLBACK_KEY_w:
                 case CALLBACK_KEY_UP:
                 case CALLBACK_KEY_s:
