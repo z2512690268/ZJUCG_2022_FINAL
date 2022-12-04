@@ -7,6 +7,10 @@
 #include "pipeline.h"
 #include "lighting.h"
 
+#include <windows.h>
+#include <imm.h>
+#pragma comment (lib ,"imm32.lib")
+
 class Scene : public ICallbacks
 {
 public:
@@ -59,6 +63,13 @@ public:
 
         // GLEW Init
         glewInit();
+
+        // 禁用输入法
+        HWND hWnd = GetActiveWindow();// 获取窗口句柄
+        HIMC g_hIMC = NULL; // g_hIMC 用于恢复时使用
+        g_hIMC = ImmAssociateContext(hWnd, NULL); // handle 为要禁用的窗口句柄
+        // 恢复禁用
+        // ImmAssociateContext(handle, hIMC); //handle 为要启用的窗口句柄 
 
         m_pBasicLight = new LightingTechnique();
         if (!m_pBasicLight->Init()) {
