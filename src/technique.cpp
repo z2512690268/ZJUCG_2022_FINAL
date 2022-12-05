@@ -122,6 +122,10 @@ void Technique::Enable()
     glUseProgram(m_shaderProg);
 }
 
+void Technique::Disable()
+{
+    glUseProgram(0);
+}
 
 GLint Technique::GetUniformLocation(const char* pUniformName)
 {

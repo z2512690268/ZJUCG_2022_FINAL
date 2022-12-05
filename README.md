@@ -1,6 +1,8 @@
 # ZJUCG_2022_FINAL
 
+glut API参考
 
+https://blog.csdn.net/iwbfaith/article/details/60957610
 
 ## Getting started
 

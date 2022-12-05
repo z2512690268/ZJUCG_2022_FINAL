@@ -1,3 +1,7 @@
+#include <imgui.h>
+#include <imgui_impl_glut.h>
+#include <imgui_impl_opengl2.h>
+
 #include "callback.h"
 
 static ICallbacks dummy_callbacks;
@@ -91,25 +95,29 @@ static void _KeyboardCB(unsigned char key, int x, int y)
     CALLBACK_KEY cb_key = GLUTKeyToCBKey(key);
     g_pCallbacks->SetKeyState(cb_key, CALLBACK_KEY_STATE_PRESS);
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_PRESS, x, y);
-
+    ImGui_ImplGLUT_KeyboardFunc(key, x, y);
 }
+
 static void _KeyboardUpCB(unsigned char key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTKeyToCBKey(key);
     g_pCallbacks->SetKeyState(cb_key, CALLBACK_KEY_STATE_RELEASE);
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_RELEASE, x, y);
+    ImGui_ImplGLUT_KeyboardUpFunc(key, x, y);
 }
 static void _SpecialKeyboardCB(int key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTSpecialKeyToCBKey(key);
     g_pCallbacks->SetKeyState(cb_key, CALLBACK_KEY_STATE_PRESS);
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_PRESS, x, y);
+    ImGui_ImplGLUT_SpecialFunc(key, x, y);
 }
 static void _SpecialKeyboardUpCB(int key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTSpecialKeyToCBKey(key);
     g_pCallbacks->SetKeyState(cb_key, CALLBACK_KEY_STATE_RELEASE);
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_RELEASE, x, y);
+    ImGui_ImplGLUT_SpecialUpFunc(key, x, y);
 }
 static void _MouseCB(int button, int state, int x, int y)
 {
@@ -117,15 +125,18 @@ static void _MouseCB(int button, int state, int x, int y)
     CALLBACK_MOUSE_STATE cb_state = (state == GLUT_DOWN) ? CALLBACK_MOUSE_STATE_PRESS : CALLBACK_MOUSE_STATE_RELEASE;
     g_pCallbacks->SetMouseState(cb_mouse, cb_state);
     g_pCallbacks->MouseCB(cb_mouse, cb_state, x, y);
+    ImGui_ImplGLUT_MouseFunc(button, state, x, y);
 }
 static void _MouseMotionCB(int x, int y)
 {
     g_pCallbacks->MouseMotionCB(x, y);
+    ImGui_ImplGLUT_MotionFunc(x, y);
 }
 
 static void _MousePassiveMotionCB(int x, int y)
 {
     g_pCallbacks->PassiveMouseCB(x, y);
+    ImGui_ImplGLUT_MotionFunc(x, y);
 }
 
 static void _RenderSceneCB()
@@ -138,6 +149,17 @@ static void _IdleCB()
     g_pCallbacks->RenderSceneCB();
 }
 
+static void _ReshapeCB(int width, int height)
+{
+    g_pCallbacks->ReshapeCB(width, height);
+    ImGui_ImplGLUT_ReshapeFunc(width, height);
+}
+
+static void _MouseWheelCB(int button, int dir, int x, int y)
+{
+    g_pCallbacks->MouseWheelCB(button, dir, x, y);
+    ImGui_ImplGLUT_MouseWheelFunc(button, dir, x, y);
+}
 void InitCallbacks()
 {
     glutIgnoreKeyRepeat(1);
@@ -148,8 +170,10 @@ void InitCallbacks()
     glutSpecialFunc(_SpecialKeyboardCB);
     glutSpecialUpFunc(_SpecialKeyboardUpCB);
     glutMouseFunc(_MouseCB);
+    glutMouseWheelFunc(_MouseWheelCB);
     glutMotionFunc(_MouseMotionCB);
     glutPassiveMotionFunc(_MousePassiveMotionCB);
+    glutReshapeFunc(_ReshapeCB);
 }
 
 void DeleteCallbacks()
@@ -161,8 +185,10 @@ void DeleteCallbacks()
     glutSpecialFunc(NULL);
     glutSpecialUpFunc(NULL);
     glutMouseFunc(NULL);
+    glutMouseWheelFunc(NULL);
     glutMotionFunc(NULL);
     glutPassiveMotionFunc(NULL);
+    glutReshapeFunc(NULL);
 }
 
 void RegisterICallback(ICallbacks *callback)

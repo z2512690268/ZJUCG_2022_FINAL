@@ -7,9 +7,9 @@
 #include "pipeline.h"
 #include "lighting.h"
 
-#include "imgui.h"
-#include "imgui_impl_glut.h"
-#include "imgui_impl_opengl2.h"
+#include <imgui.h>
+#include <imgui_impl_glut.h>
+#include <imgui_impl_opengl2.h>
 #include <windows.h>
 #include <imm.h>
 #pragma comment (lib ,"imm32.lib")
@@ -73,6 +73,20 @@ public:
         // 恢复禁用
         // ImmAssociateContext(handle, hIMC); //handle 为要启用的窗口句柄 
 
+        // ImGui Init
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGLUT_Init();
+        ImGui_ImplGLUT_InstallFuncs();
+        ImGui_ImplOpenGL2_Init();
+
         // 初始化灯光
         m_pBasicLight = new LightingTechnique();
         if (!m_pBasicLight->Init()) {
@@ -85,10 +99,11 @@ public:
         m_pBasicLight->SetMatSpecularPower(0);
         m_pBasicLight->SetPointLights(0, nullptr);
         m_pBasicLight->SetSpotLights(0, nullptr);
-
+        m_pBasicLight->Disable();
+        
         // init directionLight
         m_directionalLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
-        m_directionalLight.AmbientIntensity = 0.0f;
+        m_directionalLight.AmbientIntensity = 0.4f;
         m_directionalLight.DiffuseIntensity = 0.01f;
         m_directionalLight.Direction = glm::vec3(1.0f, -1.0f, 0.0f);
 
@@ -110,12 +125,51 @@ public:
         return true;
     };
 
+    virtual bool PreRender() {
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplGLUT_NewFrame();
+        ImGui::NewFrame();
+
+        m_pCamera->OnRender();
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_pBasicLight->Enable();
+        m_pBasicLight->SetDirectionalLight(m_directionalLight);
+        m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
+        m_pBasicLight->Disable();
+
+        return true;
+    };
+
+    virtual bool Render() {
+        return true;
+    };
+
+    virtual bool PostRender() {
+        // 检查长按事件
+        CheckKeyBoard();
+        glutSwapBuffers();
+        return true;
+    };
+
     virtual bool Preback(int argc, char **argv) {
         return true;
     };
 
     virtual bool Postback(int argc, char **argv) {
+        // Imgui Cleanup
+        ImGui_ImplOpenGL2_Shutdown();
+        ImGui_ImplGLUT_Shutdown();
+        ImGui::DestroyContext();
         return true;
+    };
+
+    virtual void RenderSceneCB() {
+        PreRender();
+        Render();
+        PostRender();
     };
 
     virtual void KeyboardCB(CALLBACK_KEY Key, CALLBACK_KEY_STATE KeyState, int x, int y)
