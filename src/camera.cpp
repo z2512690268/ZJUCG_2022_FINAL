@@ -18,7 +18,7 @@ Camera::Camera(int WindowWidth, int WindowHeight)
     Init();
 }
 
-
+//ÉãÏñ»ú³õÊ¼»¯
 Camera::Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up)
 {
     m_windowWidth  = WindowWidth;
