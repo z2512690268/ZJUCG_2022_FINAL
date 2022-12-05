@@ -40,7 +40,6 @@ public:
         InitCallbacks();
 
         // GLUT 主循环
-        glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
         glutMainLoop();
         return m_ret;
     };
@@ -52,9 +51,9 @@ public:
     virtual bool Preinit(int argc, char **argv) {
         // GLUT Init and Window Create
         glutInit(&argc, argv);
-        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+        glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
         glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        glutInitWindowPosition(0, 0);
         glutCreateWindow("OpenGL Sample");
 
         // Enter Game Mode(Full Screen)
@@ -67,22 +66,6 @@ public:
         // GLEW Init
         glewInit();
 
-        // Setup Dear ImGui context
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
-
-        // Setup Platform/Renderer backends
-        // FIXME: Consider reworking this example to install our own GLUT funcs + forward calls ImGui_ImplGLUT_XXX ones, instead of using ImGui_ImplGLUT_InstallFuncs().
-        ImGui_ImplGLUT_Init();
-        ImGui_ImplGLUT_InstallFuncs();
-        ImGui_ImplOpenGL2_Init();
-
         // 禁用输入法
         HWND hWnd = GetActiveWindow();// 获取窗口句柄
         HIMC g_hIMC = NULL; // g_hIMC 用于恢复时使用
@@ -90,6 +73,7 @@ public:
         // 恢复禁用
         // ImmAssociateContext(handle, hIMC); //handle 为要启用的窗口句柄 
 
+        // 初始化灯光
         m_pBasicLight = new LightingTechnique();
         if (!m_pBasicLight->Init()) {
             printf("Error initializing the lighting technique\n");
