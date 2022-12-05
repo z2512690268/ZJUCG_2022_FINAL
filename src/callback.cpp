@@ -90,6 +90,7 @@ CALLBACK_MOUSE GLUTMouseToCBMouse(int Button)
     }
 }
 //各类回调接口
+//按下按键回调
 static void _KeyboardCB(unsigned char key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTKeyToCBKey(key);
@@ -97,7 +98,7 @@ static void _KeyboardCB(unsigned char key, int x, int y)
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_PRESS, x, y);
     ImGui_ImplGLUT_KeyboardFunc(key, x, y);
 }
-
+//弹起按键回调
 static void _KeyboardUpCB(unsigned char key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTKeyToCBKey(key);
@@ -105,6 +106,7 @@ static void _KeyboardUpCB(unsigned char key, int x, int y)
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_RELEASE, x, y);
     ImGui_ImplGLUT_KeyboardUpFunc(key, x, y);
 }
+//特殊按键按下回调
 static void _SpecialKeyboardCB(int key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTSpecialKeyToCBKey(key);
@@ -112,6 +114,7 @@ static void _SpecialKeyboardCB(int key, int x, int y)
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_PRESS, x, y);
     ImGui_ImplGLUT_SpecialFunc(key, x, y);
 }
+//特殊按键弹起回调
 static void _SpecialKeyboardUpCB(int key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTSpecialKeyToCBKey(key);
@@ -119,6 +122,7 @@ static void _SpecialKeyboardUpCB(int key, int x, int y)
     g_pCallbacks->KeyboardCB(cb_key, CALLBACK_KEY_STATE_RELEASE, x, y);
     ImGui_ImplGLUT_SpecialUpFunc(key, x, y);
 }
+//鼠标按键回调(按下/弹起)
 static void _MouseCB(int button, int state, int x, int y)
 {
     CALLBACK_MOUSE cb_mouse = GLUTMouseToCBMouse(button);
@@ -127,6 +131,7 @@ static void _MouseCB(int button, int state, int x, int y)
     g_pCallbacks->MouseCB(cb_mouse, cb_state, x, y);
     ImGui_ImplGLUT_MouseFunc(button, state, x, y);
 }
+//鼠标移动回调函数
 static void _MouseMotionCB(int x, int y)
 {
     g_pCallbacks->MouseMotionCB(x, y);

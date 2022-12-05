@@ -22,14 +22,14 @@ Camera::Camera(int WindowWidth, int WindowHeight)
 //摄像机初始化
 Camera::Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up)
 {
-    m_windowWidth  = WindowWidth;
-    m_windowHeight = WindowHeight;
-    m_pos = Pos;
+    m_windowWidth  = WindowWidth;   //初始化窗口大小
+    m_windowHeight = WindowHeight;  //初始化窗口大小
+    m_pos = Pos;                    //初始化相机位置
 
-    m_target = Target;
+    m_target = Target;              //初始化相机方向
     glm::normalize(m_target);
 
-    m_up = Up;
+    m_up = Up;                      //初始化上方向量
     glm::normalize(m_up);
 
     initPos = m_pos;
@@ -39,13 +39,13 @@ Camera::Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const gl
     Init();
 }
 
-
+//创建相机方法
 void Camera::Init()
 {
     glm::vec3 HTarget(m_target.x, 0.0, m_target.z);
     glm::normalize(HTarget);
-
-    if (HTarget.z >= 0.0f)
+    //由向量反推至角度
+    if (HTarget.z >= 0.0f)//视角在"向前看"
     {
         if (HTarget.x >= 0.0f)
         {
@@ -56,7 +56,7 @@ void Camera::Init()
             m_AngleH = 180.0f + glm::degrees(asin(HTarget.z));
         }
     }
-    else
+    else//视角在"向后看"
     {
         if (HTarget.x >= 0.0f)
         {
@@ -70,6 +70,7 @@ void Camera::Init()
 
     m_AngleV = -glm::degrees(asin(m_target.y));
 
+    //鼠标位置与控件初始化
     m_OnUpperEdge = false;
     m_OnLowerEdge = false;
     m_OnLeftEdge  = false;
@@ -78,6 +79,7 @@ void Camera::Init()
     m_mousePos.y  = m_windowHeight / 2;
 }
 
+//键盘控制镜头移动方法
 bool Camera::OnKeyboard(CALLBACK_KEY Key) {
     bool Ret = false;
     glm::vec3 Direction = m_target;
@@ -134,7 +136,7 @@ bool Camera::OnKeyboard(CALLBACK_KEY Key) {
     return Ret;        
 }
 
-
+//鼠标控制镜头视角方法
 void Camera::OnMouse(int x, int y)
 {
     const int DeltaX = x - m_mousePos.x;
@@ -175,7 +177,7 @@ void Camera::OnMouse(int x, int y)
     Update();
 }
 
-
+//渲染判定方法
 void Camera::OnRender()
 {
     bool ShouldUpdate = false;
@@ -207,6 +209,7 @@ void Camera::OnRender()
     }
 }
 
+//刷新方法
 void Camera::Update()
 {
     const glm::vec3 Vaxis(0.0f, 1.0f, 0.0f);

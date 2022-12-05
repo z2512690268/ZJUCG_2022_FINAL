@@ -10,18 +10,22 @@ LightingTechnique::LightingTechnique()
 bool LightingTechnique::Init()
 {
     if (!Technique::Init()) {
+        printf("lighting.cpp:13 Lighting Initialization Failed!\n");
         return false;
     }
 
     if (!AddShader(GL_VERTEX_SHADER, "shader/lighting.vs")) {
+        printf("lighting.cpp:18 Lighting Loading Failed\n");
         return false;
     }
 
     if (!AddShader(GL_FRAGMENT_SHADER, "shader/lighting.fs")) {
+        printf("lighting.cpp:23 Lighting Loading Failed!\n");
         return false;
     }
 
     if (!Finalize()) {
+        printf("lighting.cpp:28 Lighting Finalization Failed!\n");
         return false;
     }
 
@@ -50,6 +54,7 @@ bool LightingTechnique::Init()
         m_matSpecularPowerLocation == INVALID_UNIFORM_LOCATION ||
         m_numPointLightsLocation == INVALID_UNIFORM_LOCATION ||
         m_numSpotLightsLocation == INVALID_UNIFORM_LOCATION) {
+        printf("lighting.cpp:57 Invalid Lighting!\n");
         return false;
     }
 
@@ -84,6 +89,7 @@ bool LightingTechnique::Init()
             m_pointLightsLocation[i].Atten.Constant == INVALID_UNIFORM_LOCATION ||
             m_pointLightsLocation[i].Atten.Linear == INVALID_UNIFORM_LOCATION ||
             m_pointLightsLocation[i].Atten.Exp == INVALID_UNIFORM_LOCATION) {
+            printf("lighting.cpp:92 Invalid Lighting On Element %d!\n", i);
             return false;
         }
     }
@@ -127,6 +133,7 @@ bool LightingTechnique::Init()
             m_spotLightsLocation[i].Atten.Constant == INVALID_UNIFORM_LOCATION ||
             m_spotLightsLocation[i].Atten.Linear == INVALID_UNIFORM_LOCATION ||
             m_spotLightsLocation[i].Atten.Exp == INVALID_UNIFORM_LOCATION) {
+            printf("lighting.cpp:136 Invalid Lighting On Element %d!\n", i);
             return false;
         }
     }

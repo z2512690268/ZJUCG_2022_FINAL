@@ -8,22 +8,22 @@ SkyboxTechnique::SkyboxTechnique()
 bool SkyboxTechnique::Init()
 {
     if (!Technique::Init()) {
-        printf("Init Failed!\n");
+        printf("skybox.cpp:11 Init Failed!\n");
         return false;
     }
 
     if (!AddShader(GL_VERTEX_SHADER, "shader/skybox.vs")) {
-        printf("Add Shader Failed!\n");
+        printf("skybox.cpp:16 Add Shader Failed!\n");
         return false;
     }
 
     if (!AddShader(GL_FRAGMENT_SHADER, "shader/skybox.fs")) {
-        printf("Add Shader Failed!\n");
+        printf("skybox.cpp:21 Add Shader Failed!\n");
         return false;
     }
 
     if (!Finalize()) {
-        printf("Finalization Failed!\n");
+        printf("skybox.cpp:26 Finalization Failed!\n");
         return false;
     }
 
@@ -84,7 +84,7 @@ bool SkyBox::Init(const std::string& Directory,
     m_pSkyboxTechnique = new SkyboxTechnique();
     
     if (!m_pSkyboxTechnique->Init()) {
-        printf("Error initializing the skybox technique\n");
+        printf("skybox.cpp:87 Error initializing the skybox technique\n");
         return false;
     }
 
@@ -100,7 +100,7 @@ bool SkyBox::Init(const std::string& Directory,
                                        NegZFilename);
 
     if (!m_pCubemapTex->Load()) {
-        printf("Loading Skybox Failure!\n");
+        printf("skybox.cpp:103 Loading Skybox Failure!\n");
         return false;
     }
 
