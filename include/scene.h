@@ -99,10 +99,11 @@ public:
         m_pBasicLight->SetMatSpecularPower(0);
         m_pBasicLight->SetPointLights(0, nullptr);
         m_pBasicLight->SetSpotLights(0, nullptr);
-
+        m_pBasicLight->Disable();
+        
         // init directionLight
         m_directionalLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
-        m_directionalLight.AmbientIntensity = 0.0f;
+        m_directionalLight.AmbientIntensity = 0.4f;
         m_directionalLight.DiffuseIntensity = 0.01f;
         m_directionalLight.Direction = glm::vec3(1.0f, -1.0f, 0.0f);
 
@@ -128,6 +129,7 @@ public:
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGLUT_NewFrame();
+        ImGui::NewFrame();
 
         m_pCamera->OnRender();
 
@@ -136,7 +138,8 @@ public:
         m_pBasicLight->Enable();
         m_pBasicLight->SetDirectionalLight(m_directionalLight);
         m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
-    
+        m_pBasicLight->Disable();
+
         return true;
     };
 
