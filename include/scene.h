@@ -129,7 +129,6 @@ public:
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGLUT_NewFrame();
-        ImGui::NewFrame();
 
         m_pCamera->OnRender();
 
