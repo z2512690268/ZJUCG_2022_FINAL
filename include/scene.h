@@ -125,6 +125,18 @@ public:
     };
 
     virtual bool PreRender() {
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplGLUT_NewFrame();
+
+        m_pCamera->OnRender();
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_pBasicLight->Enable();
+        m_pBasicLight->SetDirectionalLight(m_directionalLight);
+        m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
+    
         return true;
     };
 
@@ -133,6 +145,9 @@ public:
     };
 
     virtual bool PostRender() {
+        // 检查长按事件
+        CheckKeyBoard();
+        glutSwapBuffers();
         return true;
     };
 
