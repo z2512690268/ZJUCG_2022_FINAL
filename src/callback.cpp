@@ -6,7 +6,7 @@
 
 static ICallbacks dummy_callbacks;
 static ICallbacks *g_pCallbacks = NULL;
-
+//特殊按键控制
 CALLBACK_KEY GLUTSpecialKeyToCBKey(int Key)
 {
     switch (Key)
@@ -59,6 +59,7 @@ CALLBACK_KEY GLUTSpecialKeyToCBKey(int Key)
         return CALLBACK_KEY_UNDEFINED;
     }
 }
+//按键回调
 CALLBACK_KEY GLUTKeyToCBKey(int Key)
 {
     if (
@@ -73,7 +74,7 @@ CALLBACK_KEY GLUTKeyToCBKey(int Key)
         return CALLBACK_KEY_UNDEFINED;
     }
 }
-
+//鼠标回调
 CALLBACK_MOUSE GLUTMouseToCBMouse(int Button)
 {
     switch (Button)
@@ -88,7 +89,7 @@ CALLBACK_MOUSE GLUTMouseToCBMouse(int Button)
         return CALLBACK_MOUSE_UNDEFINED;
     }
 }
-
+//各类回调接口
 static void _KeyboardCB(unsigned char key, int x, int y)
 {
     CALLBACK_KEY cb_key = GLUTKeyToCBKey(key);
