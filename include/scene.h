@@ -7,9 +7,9 @@
 #include "pipeline.h"
 #include "lighting.h"
 
-#include "imgui.h"
-#include "imgui_impl_glut.h"
-#include "imgui_impl_opengl2.h"
+#include <imgui.h>
+#include <imgui_impl_glut.h>
+#include <imgui_impl_opengl2.h>
 #include <windows.h>
 #include <imm.h>
 #pragma comment (lib ,"imm32.lib")
@@ -73,6 +73,20 @@ public:
         // 恢复禁用
         // ImmAssociateContext(handle, hIMC); //handle 为要启用的窗口句柄 
 
+        // ImGui Init
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGLUT_Init();
+        ImGui_ImplGLUT_InstallFuncs();
+        ImGui_ImplOpenGL2_Init();
+
         // 初始化灯光
         m_pBasicLight = new LightingTechnique();
         if (!m_pBasicLight->Init()) {
@@ -110,12 +124,34 @@ public:
         return true;
     };
 
+    virtual bool PreRender() {
+        return true;
+    };
+
+    virtual bool Render() {
+        return true;
+    };
+
+    virtual bool PostRender() {
+        return true;
+    };
+
     virtual bool Preback(int argc, char **argv) {
         return true;
     };
 
     virtual bool Postback(int argc, char **argv) {
+        // Imgui Cleanup
+        ImGui_ImplOpenGL2_Shutdown();
+        ImGui_ImplGLUT_Shutdown();
+        ImGui::DestroyContext();
         return true;
+    };
+
+    virtual void RenderSceneCB() {
+        PreRender();
+        Render();
+        PostRender();
     };
 
     virtual void KeyboardCB(CALLBACK_KEY Key, CALLBACK_KEY_STATE KeyState, int x, int y)

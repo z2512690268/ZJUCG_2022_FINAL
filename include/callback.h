@@ -157,7 +157,11 @@ public:
 
     virtual void MouseMotionCB(int x, int y) {};
 
+    virtual void MouseWheelCB(int Wheel, int Direction, int x, int y) {};
+
     virtual void RenderSceneCB() {};
+
+    virtual void ReshapeCB(int w, int h) {};
 };
 
 CALLBACK_KEY GLUTSpecialKeyToCBKey(int Key);
