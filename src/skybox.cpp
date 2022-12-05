@@ -8,18 +8,22 @@ SkyboxTechnique::SkyboxTechnique()
 bool SkyboxTechnique::Init()
 {
     if (!Technique::Init()) {
+        printf("Init Failed!\n");
         return false;
     }
 
     if (!AddShader(GL_VERTEX_SHADER, "shader/skybox.vs")) {
+        printf("Add Shader Failed!\n");
         return false;
     }
 
     if (!AddShader(GL_FRAGMENT_SHADER, "shader/skybox.fs")) {
+        printf("Add Shader Failed!\n");
         return false;
     }
 
     if (!Finalize()) {
+        printf("Finalization Failed!\n");
         return false;
     }
 
@@ -28,6 +32,7 @@ bool SkyboxTechnique::Init()
  
     if (m_WVPLocation == INVALID_VALUE ||
         m_textureLocation == INVALID_VALUE) {
+        printf("Invalid Skybox!\n");
         return false;
     }
 
@@ -95,6 +100,7 @@ bool SkyBox::Init(const std::string& Directory,
                                        NegZFilename);
 
     if (!m_pCubemapTex->Load()) {
+        printf("Loading Skybox Failure!\n");
         return false;
     }
 
