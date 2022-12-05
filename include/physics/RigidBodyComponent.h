@@ -15,7 +15,7 @@ public:
 	virtual void Finalize() noexcept;
 	virtual void Tick() noexcept;
 	RigidBodyComponent();
-	RigidBodyComponent(float mass, const glm::mat4x4& inertia, float impulseCoeff, float frictionCoeff);
+	RigidBodyComponent(float mass, const glm::mat3x3& inertia, float impulseCoeff, float frictionCoeff);
 
 public:
 	RigidBody* GetRigidBody();
