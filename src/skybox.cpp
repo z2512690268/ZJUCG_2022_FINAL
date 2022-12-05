@@ -136,4 +136,6 @@ void SkyBox::Render()
 
     glCullFace(OldCullFaceMode);
     glDepthFunc(OldDepthFuncMode);
+
+    m_pSkyboxTechnique->Disable();
 }
