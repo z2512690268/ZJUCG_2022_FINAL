@@ -17,6 +17,8 @@ public:
 
     void Enable();
 
+    void Disable();
+
     GLuint GetProgram() const { return m_shaderProg; }
 
 protected:
