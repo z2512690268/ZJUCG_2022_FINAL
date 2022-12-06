@@ -487,111 +487,182 @@ private:
     float m_scale;
 };
 
+class mRectangle
+{
+public:
+	std::vector<Vertex> Vertices;
+	std::vector<unsigned int> Indices = {
+			0, 1, 2,
+			2, 1, 3,
+			4, 6, 5,
+			5, 6, 7,
+			0, 2, 4,
+			4, 2, 6,
+			1, 5, 3,
+			3, 5, 7,
+			8, 2, 9,
+			9, 2, 3,
+			0, 10, 1,
+			1, 10, 11,
+	};
+	mRectangle() {
+		mRsize = glm::vec3(1.0,1.0,1.0);
+		mRpos = glm::vec3(0.0, 0.0, 0.0);
+		Vertices = {
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(0.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(1.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
+		};
+	};
+
+	mRectangle(glm::vec3 size, glm::vec3 pos) {
+		mRsize = size;
+		mRpos = pos;
+		Vertices = {
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(0.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(1.0f, 0.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 1.0f)),
+			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
+		};
+	}
+private:
+	glm::vec3 mRsize;
+	glm::vec3 mRpos;
+};
 
 class Lab5 : public Scene
 {
 public:
-    Lab5() {
-        m_pDeskFoot = nullptr;
-        m_pSkyBox = nullptr;
-    }
-    ~Lab5() {
-        SAFE_DELETE(m_pDeskFoot);
-        SAFE_DELETE(m_pSkyBox);
-    }
-    virtual bool Init()
-    {
-        // init camera
-        glm::vec3 Pos(0.0f, 4.0f, 6.0f);
-        glm::vec3 Target(0.0f, -4.0f, -6.0f);
-        glm::vec3 Up(0.0f, 1.0f, 0.0f); 
-        m_pCamera->SetPos(Pos);
-        m_pCamera->SetTarget(Target);
-        m_pCamera->SetUp(Up);
+	Lab5() : Scene() {
+		m_pdesk = nullptr;
+		m_pleg[0] = nullptr;
+		m_pleg[1] = nullptr;
+		m_pleg[2] = nullptr;
+		m_pleg[3] = nullptr;
+	}
+	~Lab5() {
+		SAFE_DELETE(m_pdesk);
+		SAFE_DELETE(m_pleg[0]);
+		SAFE_DELETE(m_pleg[1]);
+		SAFE_DELETE(m_pleg[2]);
+		SAFE_DELETE(m_pleg[3]);
+	}
+	virtual bool Init()
+	{
+		m_pdesk = new Mesh();
+		for (int i = 0; i < 4; i++) m_pleg[i] = new Mesh();
+		// init Plane
+		const glm::vec3 Normal = glm::vec3(0.0, 1.0f, 0.0f);
 
-        // init desk
-        m_pDeskFoot = new Mesh();
+		// 每个mRectangle对象传递两个vec3参数，第一个参数为长方体大小，第二个为位置
+		desk = new mRectangle(glm::vec3(1.0f, 1.0f, 0.2f), glm::vec3(0.0f, 0.0f, 0.0f));
+		leg[0] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, -0.2f));
+		leg[1] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, -0.2f));
+		leg[2] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, 0.2f));
+		leg[3] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, 0.2f));
 
-        std::vector<Vertex> vertices = {
-            Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0.0f, 0.0f)),
-            Vertex(glm::vec3(-1.0f, -1.0f,  1.0f), glm::vec2(0.0f, 1.0f)),
-            Vertex(glm::vec3(-1.0f,  1.0f, -1.0f), glm::vec2(1.0f, 0.0f)),
-            Vertex(glm::vec3(-1.0f,  1.0f,  1.0f), glm::vec2(1.0f, 1.0f)),
-            Vertex(glm::vec3( 1.0f, -1.0f, -1.0f), glm::vec2(0.0f, 0.0f)),
-            Vertex(glm::vec3( 1.0f, -1.0f,  1.0f), glm::vec2(0.0f, 1.0f)),
-            Vertex(glm::vec3( 1.0f,  1.0f, -1.0f), glm::vec2(1.0f, 0.0f))
-        };
+		CalcVerticesNormal(desk->Vertices, desk->Indices);
+		for (int i = 0; i < 4; i++) CalcVerticesNormal(leg[i]->Vertices, leg[i]->Indices);
+		int tex_id;
+		tex_id = m_pdesk->AddTexture("pic/Crack.bmp");
+		m_pdesk->AddMeshEntry(desk->Vertices, desk->Indices, tex_id);
+		//tex_id = m_pdesk->AddTexture("pic/Spot.bmp");
+		//m_pdesk->AddMeshEntry(desk->Vertices, desk->Indices, tex_id);
+		for (int i = 0; i < 4; i++)
+		{
+			tex_id = m_pleg[i]->AddTexture("pic/Crack.bmp");
+			m_pleg[i]->AddMeshEntry(leg[i]->Vertices, leg[i]->Indices, tex_id);
+		}
 
-        std::vector<unsigned int> indices = {
-            0, 1, 2,
-            2, 1, 3,
-            4, 6, 5,
-            5, 6, 7,
-            0, 2, 4,
-            4, 2, 6,
-            1, 5, 3,
-            3, 5, 7,
-            0, 4, 1,
-            1, 4, 5,
-            2, 3, 6,
-            6, 3, 7
-        };
+		// init transform  param
+		m_scale = 0.0f;
 
-        CalcVerticesNormal(vertices, indices);
-        // int tex_id = m_pDeskFoot->AddTexture("pic/Crack.bmp");
-        m_pDeskFoot->AddMeshEntry(vertices, indices, 0);
+		// init reflect param
+		m_SpecularIntensiry = 0.0f;
+		m_SpecularPower = 0.0f;
 
-        m_scale = 0.0f;
-        
-        // init skybox
-        m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
+		return true;
+	}
 
-        if (!m_pSkyBox->Init("pic",
-                "sp3right.jpg",
-                "sp3left.jpg",
-                "sp3top.jpg",
-                "sp3bot.jpg",
-                "sp3front.jpg",
-                "sp3back.jpg")) {
-            return false;
-        }
+	virtual bool Render()
+	{
 
-        return true;
-    }
+		// 要引入多个效果，必须要在每个效果之前调用Enable()函数
+		m_pBasicLight->Enable();
 
-    virtual bool Render()
-    {
-        m_pCamera->OnRender();
+		m_scale += 0.057f;
+		// init pointLight
+		PointLight pl[2];
+		pl[0].DiffuseIntensity = 0.25f;
+		pl[0].Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		pl[0].Position = glm::vec3(3.0f, 1.0f, FieldDepth * (cosf(m_scale) + 1.0f) / 2.0f);
+		pl[0].Attenuation.Linear = 0.1f;
+		pl[1].DiffuseIntensity = 0.5f;
+		pl[1].Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		pl[1].Position = glm::vec3(7.0f, 1.0f, FieldDepth * (sinf(m_scale) + 1.0f) / 2.0f);
+		pl[1].Attenuation.Linear = 0.1f;
+		m_pBasicLight->SetPointLights(2, pl);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		SpotLight sl[2];
+		sl[0].DiffuseIntensity = 0.9f;
+		sl[0].Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		sl[0].Position = m_pCamera->GetPos();
+		sl[0].Direction = m_pCamera->GetTarget();
+		sl[0].Attenuation.Linear = 0.1f;
+		sl[0].Cutoff = 90.0f;
 
-        // 要引入多个效果，必须要在每个效果之前调用Enable()函数
-        m_pBasicLight->Enable();
+		sl[1].DiffuseIntensity = 0.9f;
+		sl[1].Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		sl[1].Position = glm::vec3(5.0f, 3.0f, 10.0f);
+		sl[1].Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		sl[1].Attenuation.Linear = 0.1f;
+		sl[1].Cutoff = 20.0f;
+		m_pBasicLight->SetSpotLights(2, sl);
 
-        m_scale += 0.057f;
+		Pipeline p;
+		p.Rotate(0.0f, m_scale, 0.0f);
+		p.Translate(0.0f, 0.0f, 3.0f);
+		p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+		p.SetPerspectiveProj(m_persParam);
 
-        Pipeline p;
-        p.Rotate(0.0f, m_scale, 0.0f);
-        p.Translate(0.0f, 0.0f, 3.0f);
-        // p.Scale(20.0f, 20.0f, 20.0f);
-        p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
-        p.SetPerspectiveProj(m_persParam);
+		m_pBasicLight->SetWVP(p.GetWVPTrans());
+		m_pBasicLight->SetWorldMatrix(p.GetWorldTrans());
+		// m_pBasicLight->SetDirectionalLight(m_directionalLight);
+		// m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
 
-        m_pBasicLight->SetWVP(p.GetWVPTrans());
-        m_pBasicLight->SetWorldMatrix(p.GetWorldTrans());
+		m_pdesk->Render();
 
-        m_pDeskFoot->Render();
+		for(int i=0;i<4;i++) m_pleg[i]->Render();
+		m_pBasicLight->Disable();
 
-        m_pSkyBox->Render();
+		return true;
+	}
 
-        m_pBasicLight->Disable();
-
-        return true;
-    }
 private:
-    Mesh* m_pDeskFoot;
-    float m_scale;
-    SkyBox* m_pSkyBox;
+	Mesh* m_pdesk;
+	Mesh* m_pleg[4];
+	mRectangle* desk;
+	mRectangle* leg[4];
+	float m_scale;
+	float m_SpecularIntensiry;
+	float m_SpecularPower;
 };
 
 class Lab6 : public Scene
