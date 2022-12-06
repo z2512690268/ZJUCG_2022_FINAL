@@ -124,6 +124,7 @@ public:
         // init graber
         m_pScreenGraber = new ScreenGraber();
         grab_cnt = 0;
+        grab_switch = 0;
         return true;
     };
 
@@ -157,10 +158,12 @@ public:
         CheckKeyBoard();
         glutSwapBuffers();
         // 处理图像存储
-        grab_cnt++;
-        if(grab_cnt > 15) {
-            m_pScreenGraber->GrabScreen();
-            grab_cnt = 0;
+        if(grab_switch) {
+            grab_cnt++;
+            if(grab_cnt > 15) {
+                m_pScreenGraber->GrabScreen();
+                grab_cnt = 0;
+            }
         }
         return true;
     };
@@ -248,7 +251,11 @@ public:
                     m_pCamera->OnKeyboard(Key);
                     break;
                 case CALLBACK_KEY_p:
+                    m_pScreenGraber->GrabScreen();
                     m_pScreenGraber->saveColorImg("output/test.png");
+                    break;
+                case CALLBACK_KEY_l:
+                    grab_switch = !grab_switch;
                     break;
             }
         }
@@ -295,6 +302,7 @@ protected:
     DirectionalLight m_directionalLight;
     ScreenGraber *m_pScreenGraber = NULL;
     int grab_cnt;
+    int grab_switch;
     int m_ret;
 };
 
