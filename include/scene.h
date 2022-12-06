@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "pipeline.h"
 #include "lighting.h"
+#include "grab.h"
 
 #include <imgui.h>
 #include <imgui_impl_glut.h>
@@ -20,10 +21,12 @@ public:
     Scene() {
         m_pCamera = nullptr;
         m_pBasicLight = nullptr;
+        m_pScreenGraber = nullptr;
     }
     ~Scene() {
         SAFE_DELETE(m_pCamera);
         SAFE_DELETE(m_pBasicLight);
+        SAFE_DELETE(m_pScreenGraber);
     }
     virtual bool Init() {
         return true;
@@ -118,6 +121,8 @@ public:
         m_pCamera = new Camera(WINDOW_WIDTH, WINDOW_HEIGHT);
         m_pCamera->SetICallback(this);
 
+        // init graber
+        m_pScreenGraber = new ScreenGraber();
         return true;
     };
 
@@ -170,6 +175,10 @@ public:
         Render();
         PostRender();
     };
+
+    virtual void Keyboard(CALLBACK_KEY Key, CALLBACK_KEY_STATE KeyState, int x, int y) {
+
+    }
 
     virtual void KeyboardCB(CALLBACK_KEY Key, CALLBACK_KEY_STATE KeyState, int x, int y)
     {
@@ -231,13 +240,22 @@ public:
                 case CALLBACK_KEY_r:
                     m_pCamera->OnKeyboard(Key);
                     break;
+                case CALLBACK_KEY_p:
+                    m_pScreenGraber->Grab();
+                    m_pScreenGraber->saveColorImg("output/test.png");
+                    break;
             }
         }
+        Keyboard(Key, KeyState, x, y);
     }
+
+    virtual void PassiveMouse(int x, int y)
+    {}
 
     virtual void PassiveMouseCB(int x, int y)
     {
         m_pCamera->OnMouse(x, y);
+        PassiveMouse(x, y);
     }
 
     virtual void CheckKeyBoard() {
@@ -269,6 +287,7 @@ protected:
     PersParam m_persParam;
     LightingTechnique* m_pBasicLight = NULL;
     DirectionalLight m_directionalLight;
+    ScreenGraber *m_pScreenGraber = NULL;
     int m_ret;
 };
 

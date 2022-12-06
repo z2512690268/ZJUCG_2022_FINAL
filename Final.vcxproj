@@ -72,6 +72,7 @@
     <Import Project="packages\stb\stb.props" />
     <Import Project="packages\assimp\assimp.props" />
     <Import Project="packages\imgui-v1.88\imgui.props" />
+    <Import Project="packages\opencv2.1_VS_pack\opencv.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -183,6 +184,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\skybox.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\grab.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

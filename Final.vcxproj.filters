@@ -52,6 +52,9 @@
     <ClCompile Include="src\camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\grab.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="packages\imgui-v1.88\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
