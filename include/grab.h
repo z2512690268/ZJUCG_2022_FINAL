@@ -9,7 +9,7 @@ class ScreenGraber
 public:
 	ScreenGraber();
 	~ScreenGraber();
-	void Grab();
+	void GrabScreen();
 	void saveColorImg(const std::string& _str);
 private:
 	GLbyte* colorArr;

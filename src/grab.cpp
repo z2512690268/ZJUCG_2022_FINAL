@@ -13,7 +13,7 @@ ScreenGraber::~ScreenGraber()
 	}
 }
 
-void ScreenGraber::Grab() {
+void ScreenGraber::GrabScreen() {
 	glGetIntegerv(GL_VIEWPORT, viewPort);
 	if (colorArr != NULL){
 		delete[] colorArr; colorArr = NULL;
