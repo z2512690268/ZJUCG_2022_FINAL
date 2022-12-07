@@ -72,7 +72,7 @@
     <Import Project="packages\stb\stb.props" />
     <Import Project="packages\assimp\assimp.props" />
     <Import Project="packages\imgui-v1.88\imgui.props" />
-    <Import Project="packages\opencv2.1_VS_pack\opencv.props" />
+    <Import Project="packages\Opencv4VS\opencv.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>include;include/aimodel;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -187,6 +187,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\grab.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\aimodel\hand.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

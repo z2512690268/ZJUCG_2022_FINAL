@@ -51,3 +51,48 @@ void ScreenGraber::saveColorImg(const std::string & str){
 	}
 	cv::imwrite(str.c_str(), img);
 }
+
+
+RealityGrabber::RealityGrabber()
+{
+}
+
+RealityGrabber::~RealityGrabber()
+{
+}
+
+bool RealityGrabber::OpenReality()
+{
+	m_pcap = new cv::VideoCapture(0);
+	if (!m_pcap->isOpened()){
+		return false;
+	}
+	return true;
+}
+
+bool RealityGrabber::CloseReality()
+{
+	if (m_pcap != NULL){
+		delete m_pcap;
+		m_pcap = NULL;
+	}
+	return true;
+}
+
+void RealityGrabber::GrabReality()
+{
+	(*m_pcap) >> realityImg;
+}
+
+void RealityGrabber::saveRealityImg(const std::string & str)
+{
+	if (str.length() == 0){
+		return;
+	}
+	cv::imwrite(str.c_str(), realityImg);
+}
+
+cv::Mat RealityGrabber::getRealityImg()
+{
+	return realityImg;
+}

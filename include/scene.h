@@ -7,6 +7,7 @@
 #include "pipeline.h"
 #include "lighting.h"
 #include "grab.h"
+#include "aimodel/hand.h"
 
 #include <imgui.h>
 #include <imgui_impl_glut.h>
@@ -123,8 +124,9 @@ public:
 
         // init graber
         m_pScreenGraber = new ScreenGraber();
-        grab_cnt = 0;
-        grab_switch = 0;
+        screen_grab_cnt = 0;
+        screen_grab_switch = 0;
+        m_pRealityGrabber = new RealityGrabber();
         return true;
     };
 
@@ -158,11 +160,11 @@ public:
         CheckKeyBoard();
         glutSwapBuffers();
         // 处理图像存储
-        if(grab_switch) {
-            grab_cnt++;
-            if(grab_cnt > 15) {
+        if(screen_grab_switch) {
+            screen_grab_cnt++;
+            if(screen_grab_cnt > 15) {
                 m_pScreenGraber->GrabScreen();
-                grab_cnt = 0;
+                screen_grab_cnt = 0;
             }
         }
         return true;
@@ -255,7 +257,23 @@ public:
                     m_pScreenGraber->saveColorImg("output/test.png");
                     break;
                 case CALLBACK_KEY_l:
-                    grab_switch = !grab_switch;
+                    screen_grab_switch = !screen_grab_switch;
+                    break;
+                case CALLBACK_KEY_o:
+                    m_pRealityGrabber->OpenReality();
+                    m_pRealityGrabber->GrabReality();
+                    m_pRealityGrabber->CloseReality();
+                    m_pRealityGrabber->saveRealityImg("output/real.png");
+                    break;
+                case CALLBACK_KEY_k:
+                    m_pRealityGrabber->OpenReality();
+                    m_pRealityGrabber->GrabReality();
+                    m_pRealityGrabber->CloseReality();
+                    int ret = m_handDetector.Handpose_Recognition(m_pRealityGrabber->getRealityImg());
+                    if(ret > 0){
+                        m_ret = ret;
+                        glutLeaveMainLoop();
+                    }
                     break;
             }
         }
@@ -301,9 +319,12 @@ protected:
     LightingTechnique* m_pBasicLight = NULL;
     DirectionalLight m_directionalLight;
     ScreenGraber *m_pScreenGraber = NULL;
-    int grab_cnt;
-    int grab_switch;
+    RealityGrabber *m_pRealityGrabber = NULL;
+    int screen_grab_cnt;
+    int screen_grab_switch;
     int m_ret;
+    HandDetector  m_handDetector;
+
 };
 
 #endif

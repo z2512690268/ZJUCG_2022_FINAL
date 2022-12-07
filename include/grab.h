@@ -17,4 +17,19 @@ private:
 	cv::Size win;
 };
 
+class RealityGrabber
+{
+public:
+	RealityGrabber();
+	~RealityGrabber();
+	bool OpenReality();
+	bool CloseReality();
+	void GrabReality();
+	void saveRealityImg(const std::string& _str);
+	cv::Mat getRealityImg();
+private:
+	cv::Mat realityImg;
+	cv::VideoCapture *m_pcap;
+};
+
 #endif
