@@ -263,6 +263,8 @@ void Mesh::Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix)
                                  m_Entries[i]->BaseVertex);
     }
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 
@@ -317,7 +319,8 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
     glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
     InitBuffers(Positions, Normals, TexCoords, Indices);
     glBindVertexArray(0);
-
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     int ret = m_Entries.size() - 1;
 
     return ret;
