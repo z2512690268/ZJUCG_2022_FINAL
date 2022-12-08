@@ -463,66 +463,6 @@ private:
     float m_scale;
 };
 
-class mRectangle
-{
-public:
-	std::vector<Vertex> Vertices;
-	std::vector<unsigned int> Indices = {
-			0, 1, 2,
-			2, 1, 3,
-			4, 6, 5,
-			5, 6, 7,
-			0, 2, 4,
-			4, 2, 6,
-			1, 5, 3,
-			3, 5, 7,
-			8, 2, 9,
-			9, 2, 3,
-			0, 10, 1,
-			1, 10, 11,
-	};
-	mRectangle() {
-		mRsize = glm::vec3(1.0,1.0,1.0);
-		mRpos = glm::vec3(0.0, 0.0, 0.0);
-		Vertices = {
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-		};
-	};
-
-	mRectangle(glm::vec3 size, glm::vec3 pos) {
-		mRsize = size;
-		mRpos = pos;
-		Vertices = {
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-		};
-	}
-private:
-	glm::vec3 mRsize;
-	glm::vec3 mRpos;
-};
-
 class Lab5 : public Scene
 {
 public:
