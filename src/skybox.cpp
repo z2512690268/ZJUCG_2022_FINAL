@@ -132,7 +132,7 @@ void SkyBox::Render()
     m_pSkyboxTechnique->SetWVP(p.GetWVPTrans());
 
     m_pCubemapTex->Bind(GL_TEXTURE0);
-    m_pMesh->Render();
+    m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
 
     glCullFace(OldCullFaceMode);
     glDepthFunc(OldDepthFuncMode);

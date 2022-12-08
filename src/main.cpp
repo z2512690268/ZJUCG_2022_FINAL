@@ -72,8 +72,7 @@ public:
                                 Vertex(glm::vec3(FieldWidth, 0.0f, FieldDepth), glm::vec2(1.0f, 1.0f), Normal)
                              };
         std::vector<unsigned int> Indices = { 0, 1, 2, 3, 4, 5 };
-        int tex_id = m_pFloor->AddTexture("pic/test.png");
-        m_pFloor->AddMeshEntry(Vertices, Indices, tex_id);
+        m_pFloor->InitVertexMesh(Vertices, Indices, "pic/test.png");
         
         // init transform  param
         m_scale = 0.0f;
@@ -136,21 +135,14 @@ public:
         p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p.SetPerspectiveProj(m_persParam);
 
-        // 传递Shader参数
-        m_pBasicLight->SetWVP(p.GetWVPTrans());
-        m_pBasicLight->SetWorldMatrix(p.GetWorldTrans());
-
-        m_pMesh->Render();
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
 
         Pipeline p2;
         p2.Translate(0.0f, 0.0f, 1.0f);
         p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p2.SetPerspectiveProj(m_persParam);
 
-        m_pBasicLight->SetWVP(p2.GetWVPTrans());
-        m_pBasicLight->SetWorldMatrix(p2.GetWorldTrans());
-
-        m_pFloor->Render();
+        m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
 
         m_pSkyBox->Render();
         
@@ -198,8 +190,7 @@ public:
                                 Vertex(glm::vec3(FieldWidth, 0.0f, FieldDepth), glm::vec2(1.0f, 1.0f), Normal)
                              };
         std::vector<unsigned int> Indices = { 0, 1, 2, 3, 4, 5 };
-        int tex_id = m_pFloor->AddTexture("pic/test.png");
-        m_pFloor->AddMeshEntry(Vertices, Indices, tex_id);
+        m_pFloor->InitVertexMesh(Vertices, Indices, "pic/test.png");
         
         // init transform  param
         m_scale = 0.0f;
@@ -250,12 +241,7 @@ public:
         p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p2.SetPerspectiveProj(m_persParam);
 
-        m_pBasicLight->SetWVP(p2.GetWVPTrans());
-        m_pBasicLight->SetWorldMatrix(p2.GetWorldTrans());
-        m_pBasicLight->SetDirectionalLight(m_directionalLight);
-        m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
-
-        m_pFloor->Render();
+        m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
         m_pBasicLight->Disable();
 
         return true;
@@ -298,8 +284,7 @@ public:
 
         CalcVerticesNormal(Vertices, Indices);
 
-        int tex_id = m_pPyramid->AddTexture("pic/test.png");
-        m_pPyramid->AddMeshEntry(Vertices, Indices, tex_id);
+        m_pPyramid->InitVertexMesh(Vertices, Indices, "pic/test.png");
         
         // init transform  param
         m_scale = 0.0f;
@@ -352,12 +337,7 @@ public:
         p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p.SetPerspectiveProj(m_persParam);
 
-        m_pBasicLight->SetWVP(p.GetWVPTrans());
-        m_pBasicLight->SetWorldMatrix(p.GetWorldTrans());
-        // m_pBasicLight->SetDirectionalLight(m_directionalLight);
-        // m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
-
-        m_pPyramid->Render();
+        m_pPyramid->Render(p.GetWVPTrans(), p.GetWorldTrans());
         m_pBasicLight->Disable();
 
         return true;
@@ -408,8 +388,7 @@ public:
 
         CalcVerticesNormal(Vertices, Indices);
 
-        int tex_id = m_pPyramid->AddTexture("pic/test.png");
-        m_pPyramid->AddMeshEntry(Vertices, Indices, tex_id);
+        m_pPyramid->InitVertexMesh(Vertices, Indices, "pic/test.png");
         
         // init transform  param
         m_scale = 0.0f;
@@ -428,10 +407,7 @@ public:
         p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p.SetPerspectiveProj(m_persParam);
 
-        m_pBasicLight->SetWVP(p.GetWVPTrans());
-        m_pBasicLight->SetWorldMatrix(p.GetWorldTrans());
-
-        m_pPyramid->Render();
+        m_pPyramid->Render(p.GetWVPTrans(), p.GetWorldTrans());
         m_pBasicLight->Disable();
 
         // Rendering
@@ -581,14 +557,12 @@ public:
 		CalcVerticesNormal(desk->Vertices, desk->Indices);
 		for (int i = 0; i < 4; i++) CalcVerticesNormal(leg[i]->Vertices, leg[i]->Indices);
 		int tex_id;
-		tex_id = m_pdesk->AddTexture("pic/Crack.bmp");
-		m_pdesk->AddMeshEntry(desk->Vertices, desk->Indices, tex_id);
+		m_pdesk->InitVertexMesh(desk->Vertices, desk->Indices, "pic/Crack.bmp");
 		//tex_id = m_pdesk->AddTexture("pic/Spot.bmp");
 		//m_pdesk->AddMeshEntry(desk->Vertices, desk->Indices, tex_id);
 		for (int i = 0; i < 4; i++)
 		{
-			tex_id = m_pleg[i]->AddTexture("pic/Crack.bmp");
-			m_pleg[i]->AddMeshEntry(leg[i]->Vertices, leg[i]->Indices, tex_id);
+			m_pleg[i]->InitVertexMesh(leg[i]->Vertices, leg[i]->Indices, "pic/Crack.bmp");
 		}
 
 		// init transform  param
@@ -642,14 +616,9 @@ public:
 		p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
 		p.SetPerspectiveProj(m_persParam);
 
-		m_pBasicLight->SetWVP(p.GetWVPTrans());
-		m_pBasicLight->SetWorldMatrix(p.GetWorldTrans());
-		// m_pBasicLight->SetDirectionalLight(m_directionalLight);
-		// m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
+		m_pdesk->Render(p.GetWVPTrans(), p.GetWorldTrans());
 
-		m_pdesk->Render();
-
-		for(int i=0;i<4;i++) m_pleg[i]->Render();
+		for(int i=0;i<4;i++) m_pleg[i]->Render(p.GetWVPTrans(), p.GetWorldTrans());
 		m_pBasicLight->Disable();
 
 		return true;

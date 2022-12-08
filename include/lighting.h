@@ -93,8 +93,6 @@ public:
 
     virtual bool Init();
 
-    void SetWVP(const glm::mat4x4& WVP);
-    void SetWorldMatrix(const glm::mat4x4& WVP);
     void SetTextureUnit(unsigned int TextureUnit);
     void SetDirectionalLight(const DirectionalLight& Light);
     void SetPointLights(unsigned int NumLights, const PointLight* pLights);
@@ -105,8 +103,6 @@ public:
 
 private:
 
-    GLuint m_WVPLocation;
-    GLuint m_WorldMatrixLocation;
     GLuint m_samplerLocation;
     GLuint m_eyeWorldPosLocation;
     GLuint m_matSpecularIntensityLocation;
