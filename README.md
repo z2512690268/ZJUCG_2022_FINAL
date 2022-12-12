@@ -4,6 +4,14 @@ glut API参考
 
 https://blog.csdn.net/iwbfaith/article/details/60957610
 
+
+百度网盘下载必须的依赖包和模型:
+
+链接：https://pan.baidu.com/s/1xg7Ovyy7UkWaj9yKjU97FA 
+
+
+提取码：aja7
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
