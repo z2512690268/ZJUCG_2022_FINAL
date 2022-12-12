@@ -53,7 +53,7 @@ void SkyboxTechnique::SetTextureUnit(unsigned int TextureUnit)
 
 /****************************************************************************/
 
-SkyBox::SkyBox(const Camera* pCamera,
+SkyBox::SkyBox(const CameraBase* pCamera,
                const PersParam& p)
 {
     m_pCamera = pCamera;

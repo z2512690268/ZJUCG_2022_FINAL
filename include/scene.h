@@ -119,8 +119,7 @@ public:
         m_persParam.zFar = 100.0f;
 
         // init camera
-        m_pCamera = new Camera(WINDOW_WIDTH, WINDOW_HEIGHT);
-        m_pCamera->SetICallback(this);
+        m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         // init graber
         m_pScreenGraber = new ScreenGraber();
@@ -314,7 +313,7 @@ public:
     }
 protected:
 
-    Camera* m_pCamera = NULL;
+    CameraBase* m_pCamera = NULL;
     PersParam m_persParam;
     LightingTechnique* m_pBasicLight = NULL;
     DirectionalLight m_directionalLight;

@@ -26,7 +26,7 @@ private:
 class SkyBox
 {
 public:
-    SkyBox(const Camera* pCamera, const PersParam& p);
+    SkyBox(const CameraBase* pCamera, const PersParam& p);
 
     ~SkyBox();
 
@@ -42,7 +42,7 @@ public:
 
 private:
     SkyboxTechnique* m_pSkyboxTechnique;
-    const Camera* m_pCamera;
+    const CameraBase* m_pCamera;
     CubemapTexture* m_pCubemapTex;
     Mesh* m_pMesh;
     PersParam m_persProjInfo;

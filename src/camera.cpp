@@ -8,7 +8,7 @@ const static float EDGE_STEP = 1.5f;
 const static int MARGIN = 10;
 const static int MARGIN2 = 30;
 
-Camera::Camera(int WindowWidth, int WindowHeight)
+CameraBase::CameraBase(int WindowWidth, int WindowHeight)
 {
     m_windowWidth  = WindowWidth;
     m_windowHeight = WindowHeight;
@@ -19,7 +19,7 @@ Camera::Camera(int WindowWidth, int WindowHeight)
     Init();
 }
 
-Camera::Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up)
+CameraBase::CameraBase(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up)
 {
     m_windowWidth  = WindowWidth;
     m_windowHeight = WindowHeight;
@@ -39,7 +39,7 @@ Camera::Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const gl
 }
 
 
-void Camera::Init()
+void MoveCamera::Init()
 {
     glm::vec3 HTarget(m_target.x, 0.0, m_target.z);
     glm::normalize(HTarget);
@@ -77,7 +77,7 @@ void Camera::Init()
     m_mousePos.y  = m_windowHeight / 2;
 }
 
-bool Camera::OnKeyboard(CALLBACK_KEY Key) {
+bool MoveCamera::OnKeyboard(CALLBACK_KEY Key) {
     bool Ret = false;
     glm::vec3 Direction = m_target;
     switch (Key) {
@@ -134,7 +134,7 @@ bool Camera::OnKeyboard(CALLBACK_KEY Key) {
 }
 
 
-void Camera::OnMouse(int x, int y)
+void MoveCamera::OnMouse(int x, int y)
 {
     const int DeltaX = x - m_mousePos.x;
     const int DeltaY = y - m_mousePos.y;
@@ -175,7 +175,7 @@ void Camera::OnMouse(int x, int y)
 }
 
 
-void Camera::OnRender()
+void MoveCamera::OnRender()
 {
     bool ShouldUpdate = false;
 
@@ -206,7 +206,7 @@ void Camera::OnRender()
     }
 }
 
-void Camera::Update()
+void MoveCamera::Update()
 {
     const glm::vec3 Vaxis(0.0f, 1.0f, 0.0f);
 

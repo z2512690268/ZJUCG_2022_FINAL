@@ -129,7 +129,7 @@ public:
         m_camera.Up = Up;
     }
 
-    void SetCamera(const Camera& camera)
+    void SetCamera(const CameraBase& camera)
     {
         SetCamera(camera.GetPos(), camera.GetTarget(), camera.GetUp());
     }

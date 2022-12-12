@@ -389,7 +389,7 @@ public:
         CalcVerticesNormal(Vertices, Indices);
 
         m_pPyramid->InitVertexMesh(Vertices, Indices, "pic/test.png");
-        
+    
         // init transform  param
         m_scale = 0.0f;
         return true;

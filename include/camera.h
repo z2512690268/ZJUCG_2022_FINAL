@@ -6,24 +6,12 @@
 #include "callback.h"
 #include <GL/freeglut.h>
 
-class Camera
+class CameraBase
 {
 public:
+    CameraBase(int WindowWidth, int WindowHeight);
 
-    Camera(int WindowWidth, int WindowHeight);
-
-    Camera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
-
-    void SetICallback(ICallbacks* pCallback) 
-    { 
-        m_pCallbacks = pCallback; 
-    }
-
-    bool OnKeyboard(CALLBACK_KEY Key);
-    
-    void OnMouse(int x, int y);
-
-    void OnRender();
+    CameraBase(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
 
     const glm::vec3& GetPos() const
     {
@@ -54,11 +42,24 @@ public:
     {
         m_up = Up;
     }
-private:
 
-    void Init();
-    void Update();
+    void SetWindow(int WindowWidth, int WindowHeight)
+    {
+        m_windowWidth = WindowWidth;
+        m_windowHeight = WindowHeight;
+    }
 
+    virtual void Init() {};
+
+    virtual void Update() {};
+
+    virtual bool OnKeyboard(CALLBACK_KEY Key) {return true;};
+    
+    virtual void OnMouse(int x, int y) {};
+
+    virtual void OnRender() {};
+
+protected:
     glm::vec3 initPos;
     glm::vec3 initTarget;
     glm::vec3 initUp;
@@ -69,7 +70,27 @@ private:
 
     int m_windowWidth;
     int m_windowHeight;
+};
 
+class MoveCamera : public CameraBase
+{
+public:
+
+    MoveCamera(int WindowWidth, int WindowHeight) : CameraBase(WindowWidth, WindowHeight) {};
+
+    MoveCamera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up) :
+        CameraBase(WindowWidth, WindowHeight, Pos, Target, Up) {};
+
+    virtual bool OnKeyboard(CALLBACK_KEY Key);
+    
+    virtual void OnMouse(int x, int y);
+
+    virtual void OnRender();
+    
+    virtual void Init();
+    
+    virtual void Update();
+private:
     float m_AngleH;
     float m_AngleV;
 
@@ -79,7 +100,6 @@ private:
     bool m_OnRightEdge;
 
     glm::ivec2 m_mousePos;
-    ICallbacks* m_pCallbacks;
 };
 
 #endif	/* CAMERA_H */
