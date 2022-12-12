@@ -13,6 +13,11 @@ public:
 
     CameraBase(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up);
 
+    void SetICallBack(ICallbacks* pICallBack)
+    {
+        m_pCallback = pICallBack;
+    }
+
     const glm::vec3& GetPos() const
     {
         return m_pos;
@@ -59,6 +64,8 @@ public:
 
     virtual void OnRender() {};
 
+    virtual void CheckKeyboard() {};
+
 protected:
     glm::vec3 initPos;
     glm::vec3 initTarget;
@@ -70,6 +77,8 @@ protected:
 
     int m_windowWidth;
     int m_windowHeight;
+
+    ICallbacks* m_pCallback;
 };
 
 class MoveCamera : public CameraBase
@@ -86,7 +95,9 @@ public:
     virtual void OnMouse(int x, int y);
 
     virtual void OnRender();
-    
+
+    virtual void CheckKeyboard();
+
     virtual void Init();
     
     virtual void Update();

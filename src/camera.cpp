@@ -15,8 +15,7 @@ CameraBase::CameraBase(int WindowWidth, int WindowHeight)
     m_pos          = glm::vec3(0.0f, 0.0f, 0.0f);
     m_target       = glm::vec3(0.0f, 0.0f, 1.0f);
     m_up           = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    Init();
+    m_pCallback    = nullptr;
 }
 
 CameraBase::CameraBase(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up)
@@ -34,8 +33,6 @@ CameraBase::CameraBase(int WindowWidth, int WindowHeight, const glm::vec3& Pos, 
     initPos = m_pos;
     initTarget = m_target;
     initUp = m_up;
-
-    Init();
 }
 
 
@@ -203,6 +200,18 @@ void MoveCamera::OnRender()
 
     if (ShouldUpdate) {
         Update();
+    }
+}
+
+void MoveCamera::CheckKeyboard() {
+    CALLBACK_KEY list[10] = {
+        CALLBACK_KEY_w, CALLBACK_KEY_s, CALLBACK_KEY_a, CALLBACK_KEY_d, CALLBACK_KEY_z, 
+        CALLBACK_KEY_c, CALLBACK_KEY_UP, CALLBACK_KEY_DOWN, CALLBACK_KEY_LEFT, CALLBACK_KEY_RIGHT
+    };
+    for (int i = 0; i < 10; ++i){
+        if (m_pCallback->GetKeyState(list[i]) == CALLBACK_KEY_STATE_PRESS){
+            OnKeyboard(list[i]);
+        }
     }
 }
 

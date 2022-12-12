@@ -120,6 +120,8 @@ public:
 
         // init camera
         m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pCamera->SetICallBack(this);
+        m_pCamera->Init();
 
         // init graber
         m_pScreenGraber = new ScreenGraber();
@@ -236,21 +238,6 @@ public:
                     m_ret = 9;
                     glutLeaveMainLoop();
                     break;
-                case CALLBACK_KEY_w:
-                case CALLBACK_KEY_UP:
-                case CALLBACK_KEY_s:
-                case CALLBACK_KEY_DOWN:
-                case CALLBACK_KEY_a:
-                case CALLBACK_KEY_LEFT:
-                case CALLBACK_KEY_d:
-                case CALLBACK_KEY_RIGHT:
-                case CALLBACK_KEY_z:
-                case CALLBACK_KEY_PAGE_UP:
-                case CALLBACK_KEY_c:
-                case CALLBACK_KEY_PAGE_DOWN:
-                case CALLBACK_KEY_r:
-                    m_pCamera->OnKeyboard(Key);
-                    break;
                 case CALLBACK_KEY_p:
                     m_pScreenGraber->GrabScreen();
                     m_pScreenGraber->saveColorImg("output/test.png");
@@ -276,6 +263,7 @@ public:
                     break;
             }
         }
+        m_pCamera->OnKeyboard(Key);
         Keyboard(Key, KeyState, x, y);
     }
 
@@ -289,15 +277,8 @@ public:
     }
 
     virtual void CheckKeyBoard() {
-        CALLBACK_KEY list[10] = {
-        CALLBACK_KEY_w, CALLBACK_KEY_s, CALLBACK_KEY_a, CALLBACK_KEY_d, CALLBACK_KEY_z, 
-        CALLBACK_KEY_c, CALLBACK_KEY_UP, CALLBACK_KEY_DOWN, CALLBACK_KEY_LEFT, CALLBACK_KEY_RIGHT
-        };
-        for (int i = 0; i < 10; ++i){
-            if (GetKeyState(list[i]) == CALLBACK_KEY_STATE_PRESS){
-                m_pCamera->OnKeyboard(list[i]);
-            }
-        }
+        m_pCamera->CheckKeyboard();
+        
         if (GetKeyState(CALLBACK_KEY_f) == CALLBACK_KEY_STATE_PRESS){
             m_directionalLight.AmbientIntensity += 0.01f;
         }
