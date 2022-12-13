@@ -26,6 +26,7 @@
 #include "utils.h"
 #include "scene.h"
 #include "scenectrl.h"
+#include "shadow_map_fbo.h"
 
 static const float FieldDepth = 50.0f;
 static const float FieldWidth = 25.0f;
@@ -585,6 +586,168 @@ class Lab6 : public Scene
 class App7 : public Scene
 {
 public:
+    App7() : Scene() {
+        m_pMesh = nullptr;
+        m_pFloor = nullptr;
+        m_pSkyBox = nullptr;
+        m_pShadowMapEffect = nullptr;
+    }
+    ~App7() {
+        SAFE_DELETE(m_pMesh);
+        SAFE_DELETE(m_pFloor);
+        SAFE_DELETE(m_pSkyBox);
+        SAFE_DELETE(m_pShadowMapEffect);
+    }
+    virtual bool Init()
+    {
+        if (!m_shadowMapFBO.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
+            return false;
+        }
+
+        m_pShadowMapEffect = new ShadowMapTechnique();
+        if (!m_pShadowMapEffect->Init()) {
+            printf("Error initializing the shadow map technique\n");
+            return false;
+        }
+
+        // init spot light
+        m_spotLight.AmbientIntensity = 0.3f;
+        m_spotLight.DiffuseIntensity = 0.9f;
+        m_spotLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
+        m_spotLight.Attenuation.Linear = 0.01f;
+        m_spotLight.Position = glm::vec3(FieldWidth / 2, 30.0f, FieldDepth / 2);
+        m_spotLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+        m_spotLight.Cutoff = 20.0f;
+
+        m_pBasicLight->Enable();
+        m_pBasicLight->SetSpotLights(1, &m_spotLight);
+        m_pBasicLight->Disable();
+        // init camera
+        glm::vec3 Pos(FieldWidth / 2, 1.0f, FieldDepth / 2);//初始化坐标，位于Field中间，距地面1.0f的位置
+        glm::vec3 Target(0.0f, 0.0f, 1.0f);                 //初始化视角方向，指向景深
+        glm::vec3 Up(0.0f, 1.0f, 0.0f);                     //初始化上方方向，垂直于Field
+        m_pCamera->SetPos(Pos);
+        m_pCamera->SetTarget(Target);
+        m_pCamera->SetUp(Up);
+
+       // init mesh
+        m_pMesh = new Mesh();
+        if (!m_pMesh->LoadMesh("mesh/phoenix_ugv.md2")) {
+            return false;
+        }
+        m_pFloor = new Mesh();
+        // init Plane
+        const glm::vec3 Normal = glm::vec3(0.0, 1.0f, 0.0f);
+
+        std::vector<Vertex> Vertices = {
+                                Vertex(glm::vec3(0.0f, 0.0f, 0.0f),             glm::vec2(0.0f, 0.0f), Normal),
+                                Vertex(glm::vec3(0.0f, 0.0f, FieldDepth),       glm::vec2(0.0f, 1.0f), Normal),
+                                Vertex(glm::vec3(FieldWidth, 0.0f, 0.0f),       glm::vec2(1.0f, 0.0f), Normal),
+
+                                Vertex(glm::vec3(FieldWidth, 0.0f, 0.0f),       glm::vec2(1.0f, 0.0f), Normal),
+                                Vertex(glm::vec3(0.0f, 0.0f, FieldDepth),       glm::vec2(0.0f, 1.0f), Normal),
+                                Vertex(glm::vec3(FieldWidth, 0.0f, FieldDepth), glm::vec2(1.0f, 1.0f), Normal)
+                             };
+        std::vector<unsigned int> Indices = { 0, 1, 2, 3, 4, 5 };
+        m_pFloor->InitVertexMesh(Vertices, Indices, "pic/test.png");
+        
+        // init transform  param
+        m_scale = 0.0f;
+
+        // init skybox
+        m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
+
+        if (!m_pSkyBox->Init("pic",
+                "sp3right.jpg",
+                "sp3left.jpg",
+                "sp3top.jpg",
+                "sp3bot.jpg",
+                "sp3front.jpg",
+                "sp3back.jpg")) {
+            return false;
+        }
+        return true;
+    }
+
+    void ShadowMapPass()
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        m_shadowMapFBO.BindForWriting();
+        m_pShadowMapEffect->Enable();
+        
+        m_pBasicLight->Enable();
+
+        Pipeline p;
+        p.Scale(0.1f, 0.1f, 0.1f);
+        p.Rotate(90.0f, 0.0f, m_scale);
+        p.Translate(0.0f, 10.0f, 0.0f);
+        p.SetCamera(m_spotLight.Position, m_spotLight.Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        p.SetPerspectiveProj(m_persParam);
+        m_pBasicLight->SetLightWVP(p.GetWVPTrans());
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
+
+        Pipeline p2;
+        p2.Translate(0.0f, 0.0f, 1.0f);
+        p2.SetCamera(m_spotLight.Position, m_spotLight.Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        p2.SetPerspectiveProj(m_persParam);
+        m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
+
+        m_pBasicLight->Disable();
+
+        m_pShadowMapEffect->Disable();
+        m_shadowMapFBO.UnbindForWriting();
+    }
+
+    void RenderPass()
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        m_pBasicLight->Enable();
+
+        m_shadowMapFBO.BindForReading(GL_TEXTURE1);
+
+        Pipeline p;
+        p.Scale(0.1f, 0.1f, 0.1f);
+        p.Rotate(90.0f, 0.0f, m_scale);
+        p.Translate(FieldWidth / 2, 5.0f, FieldDepth / 2);
+        p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p.SetPerspectiveProj(m_persParam);
+        
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
+        
+        Pipeline p2;
+        p2.Translate(0.0f, 0.0f, 1.0f);
+        p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p2.SetPerspectiveProj(m_persParam);
+        m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
+        
+        m_pSkyBox->Render();
+
+        m_shadowMapFBO.UnbindForReading(GL_TEXTURE1);
+        m_pBasicLight->Disable();
+    }
+
+    virtual bool Render()
+    {
+        m_scale += 0.057f;
+
+        ShadowMapPass();
+        RenderPass();
+
+        return true;
+    }
+
+private:
+    Mesh* m_pMesh;
+    Mesh* m_pFloor;
+    float m_scale;
+    SkyBox* m_pSkyBox;
+
+    SpotLight m_spotLight;
+    ShadowMapFBO m_shadowMapFBO;
+
+    ShadowMapTechnique* m_pShadowMapEffect;
 };
 
 int main(int argc, char **argv)

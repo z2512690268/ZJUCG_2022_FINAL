@@ -101,6 +101,9 @@ public:
     void SetMatSpecularIntensity(float Intensity);
     void SetMatSpecularPower(float Power);
 
+    void SetLightWVP(const glm::mat4& LightWVP);
+    void SetShadowMapTextureUnit(unsigned int textureUnit);
+
 private:
 
     GLuint m_samplerLocation;
@@ -110,6 +113,7 @@ private:
     GLuint m_numPointLightsLocation;
     GLuint m_numSpotLightsLocation;
 
+    GLuint m_LightWVPLocation, m_shadowMapLocation;
     struct {
         GLuint Color;
         GLuint AmbientIntensity;

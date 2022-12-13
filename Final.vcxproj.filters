@@ -58,6 +58,9 @@
     <ClCompile Include="src\scene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\shadow_map_fbo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="src\aimodel\hand.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

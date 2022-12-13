@@ -73,6 +73,7 @@ bool Scene::Preinit(int argc, char **argv) {
     }
     m_pBasicLight->Enable();
     m_pBasicLight->SetTextureUnit(0);
+    m_pBasicLight->SetShadowMapTextureUnit(1);
     m_pBasicLight->SetMatSpecularIntensity(0.0f);
     m_pBasicLight->SetMatSpecularPower(0);
     m_pBasicLight->SetPointLights(0, nullptr);

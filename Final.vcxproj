@@ -192,6 +192,9 @@
     <ClCompile Include="src\scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\shadow_map_fbo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\aimodel\hand.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
