@@ -28,12 +28,14 @@ struct Transform
     glm::vec3 m_scale;
     glm::vec3 m_rotation;
     glm::vec3 m_pos;
+    glm::mat4x4 m_base;
 
     Transform()
     {
         m_scale    = glm::vec3(1.0f, 1.0f, 1.0f);
         m_rotation = glm::vec3(0.0f, 0.0f, 0.0f);
         m_pos      = glm::vec3(0.0f, 0.0f, 0.0f);
+        m_base     = glm::mat4x4(1.0f);
     }
 
     glm::mat4x4 GetScaleMatrix() const
@@ -54,10 +56,25 @@ struct Transform
         return glm::transpose(glm::translate(glm::mat4x4(1.0f), m_pos));
     }
 
-    glm::mat4x4 GetMatrix() const
+    glm::mat4x4 GetLocalMatrix() const
     {
         // glm乘法得反过来，，，https://zhuanlan.zhihu.com/p/481867433
         return GetScaleMatrix() * GetRotationMatrix() * GetTranslationMatrix();
+    }
+
+    void SetBaseMatrix(const glm::mat4x4& base)
+    {
+        m_base = base;
+    }
+
+    glm::mat4x4 GetBaseMatrix() const
+    {
+        return m_base;
+    }
+
+    glm::mat4x4 GetMatrix() const
+    {
+        return m_base * GetLocalMatrix();
     }
 };
 
@@ -171,6 +188,11 @@ public:
     const glm::mat4x4& GetWVOTrans(){
         m_WVOtransformation = GetWorldTrans() * GetViewTrans() * GetOrthoTrans();
         return m_WVOtransformation;
+    }
+    
+    void SetBaseMatrix(const glm::mat4x4& base)
+    {
+        worldTrans.SetBaseMatrix(base);
     }
 private:
     Transform worldTrans;

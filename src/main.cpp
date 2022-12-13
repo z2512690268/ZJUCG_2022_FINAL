@@ -492,11 +492,11 @@ public:
 		const glm::vec3 Normal = glm::vec3(0.0, 1.0f, 0.0f);
 
 		// 每个mRectangle对象传递两个vec3参数，第一个参数为长方体大小，第二个为位置
-		desk = new mRectangle(glm::vec3(1.0f, 1.0f, 0.2f), glm::vec3(0.0f, 0.0f, 0.0f));
-		leg[0] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, -0.2f));
-		leg[1] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, -0.2f));
-		leg[2] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, 0.2f));
-		leg[3] = new mRectangle(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, 0.2f));
+		desk = new RectangleMesh(glm::vec3(1.0f, 1.0f, 0.2f), glm::vec3(0.0f, 0.0f, 0.0f));
+		leg[0] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, -0.2f));
+		leg[1] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, -0.2f));
+		leg[2] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, 0.2f));
+		leg[3] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, 0.2f));
 
 		CalcVerticesNormal(desk->Vertices, desk->Indices);
 		for (int i = 0; i < 4; i++) CalcVerticesNormal(leg[i]->Vertices, leg[i]->Indices);
@@ -571,8 +571,8 @@ public:
 private:
 	Mesh* m_pdesk;
 	Mesh* m_pleg[4];
-	mRectangle* desk;
-	mRectangle* leg[4];
+	RectangleMesh* desk;
+	RectangleMesh* leg[4];
 	float m_scale;
 	float m_SpecularIntensiry;
 	float m_SpecularPower;
@@ -584,6 +584,7 @@ class Lab6 : public Scene
 
 class App7 : public Scene
 {
+public:
 };
 
 int main(int argc, char **argv)

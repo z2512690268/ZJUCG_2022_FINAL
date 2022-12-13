@@ -266,6 +266,8 @@ void ModelCamera::Init()
 
     m_mousePos.x  = m_windowWidth / 2;
     m_mousePos.y  = m_windowHeight / 2;
+
+    Update();
 }
 
 void ModelCamera::Update()

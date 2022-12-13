@@ -92,7 +92,7 @@ protected:
 };
 
 
-class mRectangle 
+class RectangleMesh 
 {
 public:
 	std::vector<Vertex> Vertices;
@@ -110,7 +110,7 @@ public:
 			0, 10, 1,
 			1, 10, 11,
 	};
-	mRectangle() {
+	RectangleMesh() {
 		mRsize = glm::vec3(1.0,1.0,1.0);
 		mRpos = glm::vec3(0.0, 0.0, 0.0);
 		Vertices = {
@@ -129,7 +129,7 @@ public:
 		};
 	};
 
-	mRectangle(glm::vec3 size, glm::vec3 pos) {
+	RectangleMesh(glm::vec3 size, glm::vec3 pos) {
 		mRsize = size;
 		mRpos = pos;
 		Vertices = {
@@ -152,12 +152,12 @@ private:
 	glm::vec3 mRpos;
 };
 
-class mPyramid
+class PyramidMesh
 {
 public:
 	std::vector<Vertex> Vertices;
 	std::vector<unsigned int> Indices;
-	mPyramid(glm::vec3 size,glm::vec3 pos) {
+	PyramidMesh(glm::vec3 size,glm::vec3 pos) {
 		mPsize = size;
 		mPpos = pos;
 		// 计算顶点投影到底面（即底面正多边形中心点）到顶点的距离
