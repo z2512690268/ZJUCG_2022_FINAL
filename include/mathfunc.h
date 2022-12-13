@@ -7,6 +7,8 @@
 #include <vector>
 #include "mesh.h"
 
+#define PI 3.14159265358979323846
+
 // 绕四元数旋转glm::vec3
 glm::vec3 RotateVectorByQuaternion(const glm::vec3& Vector, const float Angle, const glm::vec3& Axis);
 

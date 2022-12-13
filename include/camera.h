@@ -56,8 +56,6 @@ public:
 
     virtual void Init() {};
 
-    virtual void Update() {};
-
     virtual bool OnKeyboard(CALLBACK_KEY Key) {return true;};
     
     virtual void OnMouse(int x, int y) {};
@@ -66,11 +64,8 @@ public:
 
     virtual void CheckKeyboard() {};
 
+    virtual void OnWheel(int Direction) {};
 protected:
-    glm::vec3 initPos;
-    glm::vec3 initTarget;
-    glm::vec3 initUp;
-
     glm::vec3 m_pos;
     glm::vec3 m_target;
     glm::vec3 m_up;
@@ -85,10 +80,18 @@ class MoveCamera : public CameraBase
 {
 public:
 
-    MoveCamera(int WindowWidth, int WindowHeight) : CameraBase(WindowWidth, WindowHeight) {};
+    MoveCamera(int WindowWidth, int WindowHeight) : CameraBase(WindowWidth, WindowHeight) {
+        initPos = m_pos;
+        initTarget = m_target;
+        initUp = m_up;
+    };
 
     MoveCamera(int WindowWidth, int WindowHeight, const glm::vec3& Pos, const glm::vec3& Target, const glm::vec3& Up) :
-        CameraBase(WindowWidth, WindowHeight, Pos, Target, Up) {};
+        CameraBase(WindowWidth, WindowHeight, Pos, Target, Up) {
+        initPos = m_pos;
+        initTarget = m_target;
+        initUp = m_up;
+    };
 
     virtual bool OnKeyboard(CALLBACK_KEY Key);
     
@@ -100,8 +103,18 @@ public:
 
     virtual void Init();
     
-    virtual void Update();
 private:
+    void Update();
+
+    glm::vec3 initPos;
+    glm::vec3 initTarget;
+    glm::vec3 initUp;
+
+    const float STEP_SCALE = 0.1f;
+    const float EDGE_STEP = 1.5f;
+    const int MARGIN = 10;
+    const int MARGIN2 = 30;
+
     float m_AngleH;
     float m_AngleV;
 
@@ -110,6 +123,26 @@ private:
     bool m_OnLeftEdge;
     bool m_OnRightEdge;
 
+    glm::ivec2 m_mousePos;
+};
+
+class ModelCamera : public CameraBase
+{
+public:
+    ModelCamera(int WindowWidth, int WindowHeight) : CameraBase(WindowWidth, WindowHeight) {};
+
+    virtual void OnMouse(int x, int y);
+
+    virtual void Init();
+
+    virtual void OnWheel(int Direction);
+
+private:
+    void Update();
+    
+    glm::vec3 m_center;
+    glm::vec3 m_right;
+    float m_longitude, m_latitude, m_radius;
     glm::ivec2 m_mousePos;
 };
 

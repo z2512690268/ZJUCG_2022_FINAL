@@ -12,6 +12,9 @@ https://blog.csdn.net/iwbfaith/article/details/60957610
 
 提取码：aja7
 
+请注意直接把packages和aimodel中的文件解压到根目录下的packages和aimodel文件夹下，不要有多层目录名。
+
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.

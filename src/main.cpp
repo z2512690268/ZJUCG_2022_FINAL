@@ -390,6 +390,12 @@ public:
 
         m_pPyramid->InitVertexMesh(Vertices, Indices, "pic/test.png");
     
+        // init modelCamera
+        SAFE_DELETE(m_pCamera);
+        m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pCamera->SetICallBack(this);
+        m_pCamera->Init();
+
         // init transform  param
         m_scale = 0.0f;
         return true;
@@ -402,8 +408,6 @@ public:
         m_scale += 0.057f;
 
         Pipeline p;
-        p.Rotate(0.0f, m_scale, 0.0f);
-        p.Translate(0.0f, 0.0f, 3.0f);
         p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p.SetPerspectiveProj(m_persParam);
 

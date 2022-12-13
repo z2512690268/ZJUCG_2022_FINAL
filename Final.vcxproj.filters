@@ -55,6 +55,9 @@
     <ClCompile Include="src\grab.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="src\aimodel\hand.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
