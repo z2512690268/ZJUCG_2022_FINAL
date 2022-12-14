@@ -1,18 +1,26 @@
 # ZJUCG_2022_FINAL
 
-glut API参考
-
-https://blog.csdn.net/iwbfaith/article/details/60957610
-
-
 百度网盘下载必须的依赖包和模型:
 
 链接：https://pan.baidu.com/s/1xg7Ovyy7UkWaj9yKjU97FA 
 
-
 提取码：aja7
 
 请注意直接把packages和aimodel中的文件解压到根目录下的packages和aimodel文件夹下，不要有多层目录名。
+
+## 一些参考资料
+
+glut API参考
+
+https://blog.csdn.net/iwbfaith/article/details/60957610
+
+线框模式
+
+https://www.geeks3d.com/hacklab/20180514/demo-wireframe-shader-opengl-3-2-and-opengl-es-3-1/
+
+原始教程
+
+https://www.wenjiangs.com/doc/9ldd7ipu
 
 
 ## Getting started

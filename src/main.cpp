@@ -602,7 +602,7 @@ public:
         SphereMesh sphere;
         sphere.set(0.2, m_sectorCount, m_stackCount);
         sphere.buildVertices();
-        PyramidMesh pyramid(0.1f, 10.0f, 0.4f);
+        PyramidMesh pyramid(0.1f, 15.0f, 0.4f);
 
         m_directionalLight.DiffuseIntensity = 0.5f;
 
@@ -613,18 +613,15 @@ public:
         }
 
         if (!m_pickingTexture.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
-            printf("ERROR1!!\n");
             return false;
         }
         
         if (!m_pickingEffect.Init()) {
-            printf("ERROR2!!\n");
             return false;
         }
 
         m_predtexture = new Texture(GL_TEXTURE_2D, "pic/red.jpg");
         if (!m_predtexture->Load()) {
-            printf("ERROR3!!\n");
             return false;
         }
 
@@ -683,7 +680,9 @@ public:
                 if (k != m_selectedId){
                     m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
                 } else {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                     m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans(), m_predtexture);
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                 }
 
                 tp.Translate(i * 0.5, 0.2f, j * 0.5);
@@ -691,7 +690,9 @@ public:
                 if (k != m_selectedId){
                     m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
                 } else {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                     m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans(), m_predtexture);
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                 }
             }
         }
@@ -702,7 +703,6 @@ public:
     virtual bool Render(void)
     {
         PickPass();
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         RenderPass();
         return true;
     }
@@ -710,7 +710,6 @@ public:
     virtual void MouseCB(CALLBACK_MOUSE Button, CALLBACK_MOUSE_STATE State, int x, int y) {
         if (Button == CALLBACK_MOUSE_BUTTON_LEFT && State == CALLBACK_MOUSE_STATE_PRESS) {
             PixelInfo Pixel = m_pickingTexture.ReadPixel(x, GAMEMODE_WINDOW_HEIGHT - y);
-            printf("Pixel: %f %f %f\n", Pixel.ObjectID, Pixel.DrawID, Pixel.PrimID);
             m_selectedId = Pixel.ObjectID;
         }
     };
