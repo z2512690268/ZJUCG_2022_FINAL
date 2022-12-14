@@ -236,7 +236,7 @@ bool Mesh::InitMaterials(const aiScene* pScene, const std::string& Filename)
     return Ret;
 }
 
-void Mesh::Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix)
+void Mesh::Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix, Texture* pInputTexture)
 {
     glm::mat4x4 WVP = glm::transpose(WVPMatrix);
     glm::mat4x4 World = glm::transpose(WorldMatrix);
@@ -256,6 +256,9 @@ void Mesh::Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix)
         
         if (m_Textures[MaterialIndex]) {
             m_Textures[MaterialIndex]->Bind(GL_TEXTURE0);
+        }
+        if (pInputTexture) {
+            pInputTexture->Bind(GL_TEXTURE0);
         }
         glDrawElementsBaseVertex(GL_TRIANGLES,
                                  m_Entries[i]->NumIndices,

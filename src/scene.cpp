@@ -36,7 +36,7 @@ bool Scene::Preinit(int argc, char **argv) {
 
     // Enter Game Mode(Full Screen)
     char game_mode_string[64];
-    snprintf(game_mode_string, sizeof(game_mode_string), "%dx%d@60", 1920, 1080);
+    snprintf(game_mode_string, sizeof(game_mode_string), "%dx%d@60", GAMEMODE_WINDOW_WIDTH, GAMEMODE_WINDOW_HEIGHT);
     glutGameModeString(game_mode_string);
     glutEnterGameMode();
     glutSetCursor(GLUT_CURSOR_NONE);

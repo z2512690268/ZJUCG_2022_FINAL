@@ -65,7 +65,7 @@ public:
 
     bool LoadMesh(const std::string& Filename);
 
-    void Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix);
+    void Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix, Texture* pInputTexture = nullptr);
         
     int InitVertexMesh(const std::vector<Vertex>& Vertices,
                         const std::vector<unsigned int>& Indices,

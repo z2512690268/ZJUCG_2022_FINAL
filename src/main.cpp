@@ -27,6 +27,7 @@
 #include "scene.h"
 #include "scenectrl.h"
 #include "shadow_map_fbo.h"
+#include "picking.h"
 
 static const float FieldDepth = 50.0f;
 static const float FieldWidth = 25.0f;
@@ -584,12 +585,12 @@ class Lab6 : public Scene
 public:
     Lab6(void) : Scene(), sphereCount(36), m_sectorCount(36), m_stackCount(18)
     {
-        m_spheres = nullptr;
+        m_predtexture = nullptr;
         return;
     }
     ~Lab6(void)
     {
-        SAFE_DELETE(m_spheres);
+        SAFE_DELETE(m_predtexture);
         return;
     }
 
@@ -598,8 +599,6 @@ public:
         glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 
         m_scale = 0;
-        m_spheres = new Mesh[sphereCount];
-        m_pyraids = new Mesh[sphereCount];
         SphereMesh sphere;
         sphere.set(0.2, m_sectorCount, m_stackCount);
         sphere.buildVertices();
@@ -609,13 +608,66 @@ public:
 
         for(int i = 0; i < sphereCount; i++)
         {
-            m_spheres[i].InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
-            m_pyraids[i].InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/007FFF.jpg");
+            m_sphere.InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
+            m_pyraid.InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/007FFF.jpg");
         }
+
+        if (!m_pickingTexture.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
+            printf("ERROR1!!\n");
+            return false;
+        }
+        
+        if (!m_pickingEffect.Init()) {
+            printf("ERROR2!!\n");
+            return false;
+        }
+
+        m_predtexture = new Texture(GL_TEXTURE_2D, "pic/red.jpg");
+        if (!m_predtexture->Load()) {
+            printf("ERROR3!!\n");
+            return false;
+        }
+
+        m_selectedId = 1;
         return true;
     }
 
-    virtual bool Render(void)
+    void PickPass(void)
+    {
+        m_pickingTexture.EnableWriting();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_pickingEffect.Enable();
+
+        int k = 0;
+        Pipeline tp;
+        tp.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        tp.SetPerspectiveProj(m_persParam);
+
+        for(int i = -3; i < 3; i++){
+            for(int j = -3; j < 3; j++)
+            {
+                tp.Translate(i * 0.5, 0, j * 0.5);
+                m_pickingEffect.SetWVP(tp.GetWVPTrans());
+                ++k;
+
+                m_pickingEffect.SetObjectIndex(k);
+                m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                
+                tp.Translate(i * 0.5, 0.2f, j * 0.5);
+                m_pickingEffect.SetWVP(tp.GetWVPTrans());
+                ++k;
+
+                m_pickingEffect.SetObjectIndex(k);
+                m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+
+            }
+        }
+
+        m_pickingEffect.Disable();
+        m_pickingTexture.DisableWriting();     
+    }
+
+    void RenderPass(void)
     {
         m_pBasicLight->Enable();
         int k = 0;
@@ -627,28 +679,54 @@ public:
             for(int j = -3; j < 3; j++)
             {
                 tp.Translate(i * 0.5, 0, j * 0.5);
-                m_spheres[k].Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                ++k;
+                if (k != m_selectedId){
+                    m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                } else {
+                    m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans(), m_predtexture);
+                }
+
                 tp.Translate(i * 0.5, 0.2f, j * 0.5);
-                m_pyraids[k].Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                ++k;
+                if (k != m_selectedId){
+                    m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                } else {
+                    m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans(), m_predtexture);
+                }
             }
         }
 
-		Pipeline p;
-		p.Rotate(0.0f, m_scale, 0.0f);
-		p.Translate(0.0f, 0.0f, 3.0f);
-		p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
-		p.SetPerspectiveProj(m_persParam);
-
         m_pBasicLight->Disable();
+    }
+
+    virtual bool Render(void)
+    {
+        PickPass();
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        RenderPass();
         return true;
     }
+
+    virtual void MouseCB(CALLBACK_MOUSE Button, CALLBACK_MOUSE_STATE State, int x, int y) {
+        if (Button == CALLBACK_MOUSE_BUTTON_LEFT && State == CALLBACK_MOUSE_STATE_PRESS) {
+            PixelInfo Pixel = m_pickingTexture.ReadPixel(x, GAMEMODE_WINDOW_HEIGHT - y);
+            printf("Pixel: %f %f %f\n", Pixel.ObjectID, Pixel.DrawID, Pixel.PrimID);
+            m_selectedId = Pixel.ObjectID;
+        }
+    };
+
+    
 private:
-    Mesh *m_spheres;
-    Mesh *m_pyraids;
+    Mesh m_sphere;
+    Mesh m_pyraid;
     float m_radius;
     int m_sectorCount;
     int m_stackCount;
     const int sphereCount;
+    PickingTexture m_pickingTexture;
+    PickingTechnique m_pickingEffect;
+    Texture* m_predtexture;
+    int m_selectedId;
     float m_scale;
 };
 
