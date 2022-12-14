@@ -581,6 +581,65 @@ private:
 
 class Lab6 : public Scene
 {
+public:
+    Lab6(void) : Scene(), sphereCount(36), m_sectorCount(36), m_stackCount(18)
+    {
+        m_spheres = nullptr;
+        return;
+    }
+    ~Lab6(void)
+    {
+        SAFE_DELETE(m_spheres);
+        return;
+    }
+
+    virtual bool Init(void)
+    {
+        m_scale = 0;
+        m_spheres = new Mesh[sphereCount];
+        SphereMesh sphere;
+        sphere.set(0.2, m_sectorCount, m_stackCount);
+        sphere.buildVertices();
+
+        for(int i = 0; i < sphereCount; i++)
+        {
+            m_spheres[i].InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/white.png");
+        }
+        return true;
+    }
+
+    virtual bool Render(void)
+    {
+        m_pBasicLight->Enable();
+        int k = 0;
+        Pipeline tp;
+        tp.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        tp.SetPerspectiveProj(m_persParam);
+        
+        for(int i = -3; i < 3; i++){
+            for(int j = -3; j < 3; j++)
+            {
+                tp.Translate(i * 0.5, 0, j * 0.5);
+                m_spheres[k].Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+            }
+        }
+
+		Pipeline p;
+		p.Rotate(0.0f, m_scale, 0.0f);
+		p.Translate(0.0f, 0.0f, 3.0f);
+		p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+		p.SetPerspectiveProj(m_persParam);
+
+        m_pBasicLight->Disable();
+        return true;
+    }
+private:
+    Mesh *m_spheres;
+    float m_radius;
+    int m_sectorCount;
+    int m_stackCount;
+    const int sphereCount;
+    float m_scale;
 };
 
 class App7 : public Scene

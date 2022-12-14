@@ -1,5 +1,6 @@
 #include "mesh.h"
 #include "utils.h"
+#include "mathfunc.h"
 
 #define POSITION_LOCATION 0
 #define TEX_COORD_LOCATION 1
@@ -324,4 +325,131 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
     int ret = m_Entries.size() - 1;
 
     return ret;
+}
+
+// x = r * cos(phi) * cos(theta)
+// y = r * cos(phi) * sin(theta)
+// z = r * sin(phi)
+// - pi / 2 <= phi <= pi / 2
+// 0 <= theta <= 2 * pi
+void SphereMesh::buildVertices(void)
+{
+    // clear
+    vertices.clear();
+    indices.clear();
+
+    float x, y, z, xy;                              
+    float nx, ny, nz, lengthInv = 1.0f / _radius;   
+    float s, t;
+
+    float sectorStep = 2 * PI / _sectorCount;
+    float stackStep = PI / _stackCount;
+    float sectorAngle, stackAngle;
+
+    for(int i = 0; i <= _stackCount; ++i)
+    {
+        stackAngle = PI / 2 - i * stackStep;        // 从 pi/2 到 -pi/2
+        xy = _radius * cosf(stackAngle);             // r * cos(phi)
+        z = _radius * sinf(stackAngle);              // r * sin(phi)
+
+        for(int j = 0; j <= _sectorCount; ++j)
+        {
+            Vertex v;
+            sectorAngle = j * sectorStep;           // 从0到2pi
+
+            // 顶点坐标
+            x = xy * cosf(sectorAngle);            
+            y = xy * sinf(sectorAngle);  
+            // printf("%lf, %lf, %lf\n", x, y, z);     
+            v.m_pos = glm::vec3(x, y, z);
+
+            // 单位化法向量
+            nx = x * lengthInv;
+            ny = y * lengthInv;
+            nz = z * lengthInv;
+            v.m_normal = glm::vec3(nx, ny, nz);
+
+            // 纹理坐标的范围[0, 1]
+            s = (float)j / _sectorCount;
+            t = (float)i / _stackCount;
+            v.m_tex = glm::vec2(s, t);
+
+            vertices.push_back(v);
+        }
+    }
+
+    // indices
+    //  k1--k1+1
+    //  |  / |
+    //  | /  |
+    //  k2--k2+1
+    unsigned int k1, k2;
+    for(int i = 0; i < _stackCount; ++i)
+    {
+        k1 = i * (_sectorCount + 1);     // 这一纬度的开始
+        k2 = k1 + _sectorCount + 1;      // 下一纬度的开始
+
+        for(int j = 0; j < _sectorCount; ++j, ++k1, ++k2)
+        {
+            // 除了最后一个和第一个，都有两个三角形
+            if(i != 0)
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back(k1+1);
+                // k1---k2---k1+1
+            
+            if(i != (_stackCount - 1))
+                indices.push_back(k1+1);
+                indices.push_back(k2);
+                indices.push_back(k2+1);
+                // k1+1---k2---k2+1
+
+        }
+    }
+
+    return;
+}
+
+void SphereMesh::set(float r, int sectors, int stacks)
+{
+    setRadius(r);
+    setSectorCount(sectors);
+    setStackCount(stacks);
+    return;
+}
+
+void SphereMesh::setRadius(float r)
+{
+    if(_radius != r)
+        _radius = r;
+    return;
+}
+
+void SphereMesh::setSectorCount(int sectorCount)
+{
+    if(_sectorCount != sectorCount)
+        if(sectorCount < MIN_SECTOR_COUNT)
+            _sectorCount = MIN_SECTOR_COUNT;
+        else
+            _sectorCount = sectorCount;
+    return;
+}
+
+void SphereMesh::setStackCount(int stackCount)
+{
+    if(_stackCount != stackCount)
+        if(stackCount < MIN_STACK_COUNT)
+            _stackCount = MIN_STACK_COUNT;
+        else
+            _stackCount = stackCount;
+    return;
+}
+
+SphereMesh::SphereMesh(float radius, int sectorCount, int stackCount)
+{
+    _radius = 0;
+    _sectorCount = 0;
+    _stackCount = 0;
+    set(radius, sectorCount, stackCount);
+    return;
 }

@@ -205,4 +205,39 @@ private:
 	const float PI = 3.1415926;
 };
 
+// sector是经度， stack是纬度
+class SphereMesh
+{
+public:
+    SphereMesh(float radius=1.f, int sectorCount=36, int stackCount=18);
+    ~SphereMesh() = default;
+
+    float getRadius(void) const { return _radius; }
+    int getSectorCount(void) const { return _sectorCount; }
+    int getStackCount(void) const { return _stackCount; }
+
+    void set(float r, int sectors, int stacks);
+    void setRadius(float r);
+    void setSectorCount(int sectorCount);
+    void setStackCount(int stackCount);
+	
+	void buildVertices(void);
+
+	const std::vector<Vertex>& getVertices(void) const { return vertices; }
+
+	const std::vector<unsigned int>& getIndices(void) const { return indices; }
+
+private:
+	const int MIN_SECTOR_COUNT = 3;
+	const int MIN_STACK_COUNT = 2;
+
+    float _radius;
+    int _sectorCount;
+    int _stackCount;
+
+    std::vector<unsigned int> indices;
+    std::vector<Vertex> vertices;
+};
+
+
 #endif  /* MESH_H */
