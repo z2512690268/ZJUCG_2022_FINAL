@@ -595,15 +595,22 @@ public:
 
     virtual bool Init(void)
     {
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+
         m_scale = 0;
         m_spheres = new Mesh[sphereCount];
+        m_pyraids = new Mesh[sphereCount];
         SphereMesh sphere;
         sphere.set(0.2, m_sectorCount, m_stackCount);
         sphere.buildVertices();
+        PyramidMesh pyramid(0.1f, 10.0f, 0.4f);
+
+        m_directionalLight.DiffuseIntensity = 0.5f;
 
         for(int i = 0; i < sphereCount; i++)
         {
-            m_spheres[i].InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/white.png");
+            m_spheres[i].InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
+            m_pyraids[i].InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/007FFF.jpg");
         }
         return true;
     }
@@ -615,12 +622,14 @@ public:
         Pipeline tp;
         tp.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         tp.SetPerspectiveProj(m_persParam);
-        
+
         for(int i = -3; i < 3; i++){
             for(int j = -3; j < 3; j++)
             {
                 tp.Translate(i * 0.5, 0, j * 0.5);
                 m_spheres[k].Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                tp.Translate(i * 0.5, 0.2f, j * 0.5);
+                m_pyraids[k].Render(tp.GetWVPTrans(), tp.GetWorldTrans());
             }
         }
 
@@ -635,6 +644,7 @@ public:
     }
 private:
     Mesh *m_spheres;
+    Mesh *m_pyraids;
     float m_radius;
     int m_sectorCount;
     int m_stackCount;

@@ -157,51 +157,11 @@ class PyramidMesh
 public:
 	std::vector<Vertex> Vertices;
 	std::vector<unsigned int> Indices;
-	PyramidMesh(glm::vec3 size,glm::vec3 pos) {
-		mPsize = size;
-		mPpos = pos;
-		// 计算顶点投影到底面（即底面正多边形中心点）到顶点的距离
-		float distance = (mPsize.x)/2/sin(PI/mPsize.y);
-		float degree = 0;
-		float texture = 0.0;
-		for (int i = 0; i < mPsize.y; i++)
-		{
-			Vertices.push_back(Vertex(glm::vec3(
-			mPpos.x + distance * cos(degree),
-			mPpos.y ,
-			mPpos.z + distance * sin(degree)
-			), glm::vec2(texture, 0.0f)));
-			degree += 2 * PI / mPsize.y;
-			texture += (float) 1 / (mPsize.y -1);
-		}
-		// 多增加一个点，此点坐标和点0相同，但是纹理不同，以此实现纹理连续，而不是0点到size-1点纹理是(0-1)
-		Vertices.push_back(Vertex(glm::vec3(
-			mPpos.x + distance,
-			mPpos.y ,
-			mPpos.z 
-		), glm::vec2(texture, 0.0f)));
-		Vertices.push_back(Vertex(glm::vec3(
-			mPpos.x,
-			mPpos.y + mPsize.z,
-			mPpos.z
-		), glm::vec2(0.5f, 1.0f)));
-		for (int i = 0; i < mPsize.y ; i++)
-		{
-			Indices.push_back(i);
-			Indices.push_back(mPsize.y+1);
-			Indices.push_back(i+1);
-		}
-		for (int i = 2; i < mPsize.y; i++)
-		{
-			Indices.push_back(0);
-			Indices.push_back(i-1);
-			Indices.push_back(i);
-		}
-		
-	}
+	PyramidMesh(float edgelength, float edgenum, float height);
 private:
-	glm::vec3 mPpos;
-	glm::vec3 mPsize;
+	float m_edgeLength;
+	float m_edgeNum;
+	float m_height;
 	const float PI = 3.1415926;
 };
 

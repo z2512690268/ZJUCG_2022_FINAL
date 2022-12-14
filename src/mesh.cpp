@@ -327,6 +327,51 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
     return ret;
 }
 
+PyramidMesh::PyramidMesh(float edgelength, float edgenum, float height) {
+    m_edgeLength = edgelength;
+    m_edgeNum = edgenum;
+    m_height = height;
+    // 计算顶点投影到底面（即底面正多边形中心点）到顶点的距离
+    float distance = (m_edgeLength)/2/sin(PI/m_edgeNum);
+    float degree = 0;
+    float texture = 0.0;
+    for (int i = 0; i < m_edgeNum; i++)
+    {
+        Vertices.push_back(Vertex(glm::vec3(
+        distance * cos(degree),
+        0.0f,
+        distance * sin(degree)
+        ), glm::vec2(texture, 0.0f)));
+        degree += 2 * PI / m_edgeNum;
+        texture += (float) 1 / (m_edgeNum -1);
+    }
+    // 多增加一个点，此点坐标和点0相同，但是纹理不同，以此实现纹理连续，而不是0点到size-1点纹理是(0-1)
+    Vertices.push_back(Vertex(glm::vec3(
+        distance,
+        0.0f,
+        0.0f
+    ), glm::vec2(texture, 0.0f)));
+    Vertices.push_back(Vertex(glm::vec3(
+        0.0f,
+        m_height,
+        0.0f), glm::vec2(0.5f, 1.0f)));
+    for (int i = 0; i < m_edgeNum ; i++)
+    {
+        Indices.push_back(i);
+        Indices.push_back(m_edgeNum+1);
+        Indices.push_back(i+1);
+    }
+    for (int i = 2; i < m_edgeNum; i++)
+    {
+        Indices.push_back(0);
+        Indices.push_back(i-1);
+        Indices.push_back(i);
+    }
+    CalcVerticesNormal(Vertices, Indices);
+}
+
+
+
 // x = r * cos(phi) * cos(theta)
 // y = r * cos(phi) * sin(theta)
 // z = r * sin(phi)
@@ -391,19 +436,16 @@ void SphereMesh::buildVertices(void)
 
         for(int j = 0; j < _sectorCount; ++j, ++k1, ++k2)
         {
-            // 除了最后一个和第一个，都有两个三角形
-            if(i != 0)
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1+1);
-                // k1---k2---k1+1
+            // 每块两个三角形
+            indices.push_back(k1);
+            indices.push_back(k2);
+            indices.push_back(k1+1);
+            // k1---k2---k1+1
             
-            if(i != (_stackCount - 1))
-                indices.push_back(k1+1);
-                indices.push_back(k2);
-                indices.push_back(k2+1);
-                // k1+1---k2---k2+1
-
+            indices.push_back(k1+1);
+            indices.push_back(k2);
+            indices.push_back(k2+1);
+            // k1+1---k2---k2+1
         }
     }
 
