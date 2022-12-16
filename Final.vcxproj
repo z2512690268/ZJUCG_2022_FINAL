@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>include;include/aimodel;$(IncludePath)</IncludePath>
+    <IncludePath>include;include/aimodel;include/model;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -199,6 +199,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\aimodel\hand.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\model\halfedge.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

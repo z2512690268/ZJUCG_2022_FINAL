@@ -755,14 +755,21 @@ public:
             printf("Error initializing the shadow map technique\n");
             return false;
         }
+        // init spotlight mesh
+        SphereMesh sphere;
+        sphere.set(1.0, 10, 10);
+        sphere.buildVertices();
+        m_pSphereMesh = new Mesh();
+        m_pSphereMesh->InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/sun.jpg");
+
 
         // init spot light
-        m_spotLight.AmbientIntensity = 0.3f;
+        m_spotLight.AmbientIntensity = 0.1f;
         m_spotLight.DiffuseIntensity = 0.9f;
         m_spotLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
-        m_spotLight.Attenuation.Linear = 0.01f;
-        m_spotLight.Position = glm::vec3(FieldWidth / 2, 30.0f, FieldDepth / 2);
-        m_spotLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+        m_spotLight.Attenuation.Linear = 0.1f;
+        m_spotLight.Position = glm::vec3(FieldWidth / 2 + 30.0f, 40.0f, FieldDepth / 2);
+        m_spotLight.Direction = glm::vec3(-1.0f, -1.0f, 0.0f);
         m_spotLight.Cutoff = 20.0f;
 
         m_pBasicLight->Enable();
@@ -817,13 +824,11 @@ public:
 
     void ShadowMapPass()
     {
+        m_shadowMapFBO.BindForWriting();
+
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        m_shadowMapFBO.BindForWriting();
-        m_pShadowMapEffect->Enable();
-        
         m_pBasicLight->Enable();
-
         Pipeline p;
         p.Scale(0.1f, 0.1f, 0.1f);
         p.Rotate(90.0f, 0.0f, m_scale);
@@ -831,15 +836,11 @@ public:
         p.SetCamera(m_spotLight.Position, m_spotLight.Direction, glm::vec3(0.0f, 1.0f, 0.0f));
         p.SetPerspectiveProj(m_persParam);
         m_pBasicLight->SetLightWVP(p.GetWVPTrans());
-        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
-
-        Pipeline p2;
-        p2.Translate(0.0f, 0.0f, 1.0f);
-        p2.SetCamera(m_spotLight.Position, m_spotLight.Direction, glm::vec3(0.0f, 1.0f, 0.0f));
-        p2.SetPerspectiveProj(m_persParam);
-        m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
-
         m_pBasicLight->Disable();
+
+        m_pShadowMapEffect->Enable();
+        m_pShadowMapEffect->SetWVP(p.GetWVPTrans());
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
 
         m_pShadowMapEffect->Disable();
         m_shadowMapFBO.UnbindForWriting();
@@ -847,8 +848,6 @@ public:
 
     void RenderPass()
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         m_pBasicLight->Enable();
 
         m_shadowMapFBO.BindForReading(GL_TEXTURE1);
@@ -859,7 +858,6 @@ public:
         p.Translate(FieldWidth / 2, 5.0f, FieldDepth / 2);
         p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p.SetPerspectiveProj(m_persParam);
-        
         m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
         
         Pipeline p2;
@@ -867,7 +865,13 @@ public:
         p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p2.SetPerspectiveProj(m_persParam);
         m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
-        
+
+        Pipeline p3;
+        p3.Translate(m_spotLight.Position.x, m_spotLight.Position.y, m_spotLight.Position.z);
+        p3.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p3.SetPerspectiveProj(m_persParam);
+        m_pSphereMesh->Render(p3.GetWVPTrans(), p3.GetWorldTrans());
+
         m_pSkyBox->Render();
 
         m_shadowMapFBO.UnbindForReading(GL_TEXTURE1);
@@ -889,6 +893,7 @@ private:
     Mesh* m_pFloor;
     float m_scale;
     SkyBox* m_pSkyBox;
+    Mesh* m_pSphereMesh;
 
     SpotLight m_spotLight;
     ShadowMapFBO m_shadowMapFBO;
