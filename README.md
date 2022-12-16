@@ -22,6 +22,10 @@ https://www.geeks3d.com/hacklab/20180514/demo-wireframe-shader-opengl-3-2-and-op
 
 https://www.wenjiangs.com/doc/9ldd7ipu
 
+复杂图元拾取
+
+https://www.cnblogs.com/bitzhuwei/p/modern-opengl-picking-primitive-in-VBO.html
+
 
 ## Getting started
 
