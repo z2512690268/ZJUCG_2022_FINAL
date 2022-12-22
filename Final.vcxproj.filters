@@ -67,9 +67,6 @@
     <ClCompile Include="src\aimodel\hand.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\aimodel\halfedge.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="packages\imgui-v1.88\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
