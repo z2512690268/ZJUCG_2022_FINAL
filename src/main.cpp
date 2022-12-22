@@ -164,9 +164,11 @@ class App2 : public Scene
 public:
     App2() : Scene() {
         m_pFloor = nullptr;
+        m_pTexture2 = nullptr;
     }
     ~App2() {
         SAFE_DELETE(m_pFloor);
+        SAFE_DELETE(m_pTexture2);
     }
     virtual bool Init()
     {
@@ -201,6 +203,11 @@ public:
         m_SpecularIntensiry = 0.0f;
         m_SpecularPower = 0.0f;
 
+        // init texture
+        m_pTexture2 = new Texture(GL_TEXTURE_2D, "pic/earth.jpg");
+        if (!m_pTexture2->Load()) {
+            return false;
+        }
         return true;
     }
 
@@ -243,6 +250,8 @@ public:
         p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p2.SetPerspectiveProj(m_persParam);
 
+        m_pBasicLight->SetTextureUnit(2, 1, 0.5f);
+        m_pTexture2->Bind(GL_TEXTURE2);
         m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
         m_pBasicLight->Disable();
 
@@ -254,6 +263,7 @@ private:
     float m_scale;
     float m_SpecularIntensiry;
     float m_SpecularPower;
+    Texture* m_pTexture2;
 };
 
 class App3 : public Scene
@@ -832,7 +842,7 @@ public:
         Pipeline p;
         p.Scale(0.1f, 0.1f, 0.1f);
         p.Rotate(90.0f, 0.0f, m_scale);
-        p.Translate(0.0f, 10.0f, 0.0f);
+        p.Translate(FieldWidth / 2, 10.0f, FieldDepth / 2);
         p.SetCamera(m_spotLight.Position, m_spotLight.Direction, glm::vec3(0.0f, 1.0f, 0.0f));
         p.SetPerspectiveProj(m_persParam);
         m_pBasicLight->SetLightWVP(p.GetWVPTrans());
@@ -855,7 +865,7 @@ public:
         Pipeline p;
         p.Scale(0.1f, 0.1f, 0.1f);
         p.Rotate(90.0f, 0.0f, m_scale);
-        p.Translate(FieldWidth / 2, 5.0f, FieldDepth / 2);
+        p.Translate(FieldWidth / 2, 10.0f, FieldDepth / 2);
         p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
         p.SetPerspectiveProj(m_persParam);
         m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());

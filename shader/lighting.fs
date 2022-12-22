@@ -2,6 +2,7 @@
 
 const int MAX_POINT_LIGHTS = 2;
 const int MAX_SPOT_LIGHTS = 2;
+const int MAX_TEXTURES_NUM = 2;
 
 in vec2 TexCoord0;
 in vec3 Normal0;
@@ -39,13 +40,20 @@ struct SpotLight {
     float Cutoff;
 };
 
+struct TextureType{
+    sampler2D Sampler;
+    float Intensity;
+};
+
 uniform int gNumPointLights;
 uniform int gNumSpotLights;
 uniform DirectionalLight gDirectionalLight;
 uniform PointLight gPointLights[MAX_POINT_LIGHTS];
 uniform SpotLight gSpotLights[MAX_SPOT_LIGHTS];
-uniform sampler2D gSampler;
 uniform sampler2D gShadowMap;
+
+uniform TextureType gTextures[MAX_TEXTURES_NUM];
+
 uniform vec3 gEyeWorldPos;
 uniform float gMatSpecularIntensity;
 uniform float gSpecularPower;
@@ -134,5 +142,10 @@ void main() {
         TotalLight += CalcSpotLight(gSpotLights[i], Normal, LightSpacePos);
     }
 
-    FragColor = texture2D(gSampler, TexCoord0.xy) * TotalLight;
+    vec4 texture = vec4(0.0, 0.0, 0.0, 0.0);
+    for(int i = 0; i < MAX_TEXTURES_NUM; i++) {
+        texture = mix(texture, texture2D(gTextures[i].Sampler, TexCoord0.xy), gTextures[i].Intensity);
+    }
+
+    FragColor = texture * TotalLight;
 }

@@ -88,12 +88,13 @@ public:
 
     static const unsigned int MAX_POINT_LIGHTS = 2;
     static const unsigned int MAX_SPOT_LIGHTS = 2;
+    static const unsigned int MAX_TEXTURES_NUM = 2;
 
     LightingTechnique();
 
     virtual bool Init();
 
-    void SetTextureUnit(unsigned int TextureUnit);
+    void SetTextureUnit(unsigned int TextureUnit, unsigned int TextureUnitId = 0, float TextureUnitScale = 1.0f);
     void SetDirectionalLight(const DirectionalLight& Light);
     void SetPointLights(unsigned int NumLights, const PointLight* pLights);
     void SetSpotLights(unsigned int NumLights, const SpotLight* pLights);
@@ -106,7 +107,6 @@ public:
 
 private:
 
-    GLuint m_samplerLocation;
     GLuint m_eyeWorldPosLocation;
     GLuint m_matSpecularIntensityLocation;
     GLuint m_matSpecularPowerLocation;
@@ -147,6 +147,11 @@ private:
             GLuint Exp;
         } Atten;
     } m_spotLightsLocation[MAX_SPOT_LIGHTS];
+
+    struct {
+        GLuint sampler;
+        GLuint intensity;
+    } m_TextureLocation[MAX_TEXTURES_NUM - 1];
 };
 
 

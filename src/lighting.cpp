@@ -27,7 +27,6 @@ bool LightingTechnique::Init()
 
     m_LightWVPLocation = GetUniformLocation("gLightWVP");
 
-    m_samplerLocation = GetUniformLocation("gSampler");
     m_shadowMapLocation = GetUniformLocation("gShadowMap");
     m_eyeWorldPosLocation = GetUniformLocation("gEyeWorldPos");
     m_dirLightLocation.Color = GetUniformLocation("gDirectionalLight.Base.Color");
@@ -42,7 +41,6 @@ bool LightingTechnique::Init()
     if (m_dirLightLocation.AmbientIntensity == INVALID_UNIFORM_LOCATION ||
         m_LightWVPLocation == INVALID_UNIFORM_LOCATION ||
         m_shadowMapLocation == INVALID_UNIFORM_LOCATION ||
-        m_samplerLocation == INVALID_UNIFORM_LOCATION ||
         m_eyeWorldPosLocation == INVALID_UNIFORM_LOCATION ||
         m_dirLightLocation.Color == INVALID_UNIFORM_LOCATION ||
         m_dirLightLocation.DiffuseIntensity == INVALID_UNIFORM_LOCATION ||
@@ -132,12 +130,26 @@ bool LightingTechnique::Init()
         }
     }
 
+    for(unsigned int i = 0; i < MAX_TEXTURES_NUM; ++i) {
+        char Name[128];
+        memset(Name, 0, sizeof(Name));
+        sprintf_s(Name, sizeof(Name), "gTextures[%d].Sampler", i);
+        m_TextureLocation[i].sampler = GetUniformLocation(Name);
+        sprintf_s(Name, sizeof(Name), "gTextures[%d].Intensity", i);
+        m_TextureLocation[i].intensity = GetUniformLocation(Name);
+        if (m_TextureLocation[i].sampler == INVALID_UNIFORM_LOCATION ||
+            m_TextureLocation[i].intensity == INVALID_UNIFORM_LOCATION) {
+            return false;
+        }
+    }
+
     return true;
 }
 
-void LightingTechnique::SetTextureUnit(unsigned int TextureUnit)
+void LightingTechnique::SetTextureUnit(unsigned int TextureUnit, unsigned int TextureUnitId, float TextureUnitScale)
 {
-    glUniform1i(m_samplerLocation, TextureUnit);
+    glUniform1i(m_TextureLocation[TextureUnitId].sampler, TextureUnit);
+    glUniform1f(m_TextureLocation[TextureUnitId].intensity, TextureUnitScale);
 }
 
 void LightingTechnique::SetShadowMapTextureUnit(unsigned int textureUnit)
