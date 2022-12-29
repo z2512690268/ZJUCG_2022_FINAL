@@ -28,6 +28,7 @@
 #include "scenectrl.h"
 #include "shadow_map_fbo.h"
 #include "picking.h"
+#include "gui/imfilebrowser.h"
 
 static const float FieldDepth = 50.0f;
 static const float FieldWidth = 25.0f;
@@ -367,6 +368,7 @@ static bool show_demo_window = true;
 static bool show_another_window = false;
 static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+bool cameraMoveFlag = false;
 class App4 : public Scene
 {
 public:
@@ -462,6 +464,13 @@ private:
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            
+            ImGui::Checkbox("camera move", &cameraMoveFlag);
+            if(cameraMoveFlag){
+                SetKeyState(CALLBACK_KEY_w, CALLBACK_KEY_STATE_PRESS);
+            } else {
+                SetKeyState(CALLBACK_KEY_w, CALLBACK_KEY_STATE_RELEASE);
+            }
             ImGui::End();
         }
 
@@ -503,12 +512,12 @@ public:
 		// init Plane
 		const glm::vec3 Normal = glm::vec3(0.0, 1.0f, 0.0f);
 
-		// 每个mRectangle对象传递两个vec3参数，第一个参数为长方体大小，第二个为位置
-		desk = new RectangleMesh(glm::vec3(1.0f, 1.0f, 0.2f), glm::vec3(0.0f, 0.0f, 0.0f));
-		leg[0] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, -0.2f));
-		leg[1] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, -0.2f));
-		leg[2] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(-0.2f, -0.4f, 0.2f));
-		leg[3] = new RectangleMesh(glm::vec3(0.2f, 0.2f, 0.6f), glm::vec3(0.2f, -0.4f, 0.2f));
+		// 每个mRectangle对象传递两个vec3参数，第一个参数为长方体大小
+		desk = new RectangleMesh(glm::vec3(1.0f, 0.2f, 1.0f));
+		leg[0] = new RectangleMesh(glm::vec3(0.2f, 0.6f, 0.2f));
+		leg[1] = new RectangleMesh(glm::vec3(0.2f, 0.6f, 0.2f));
+		leg[2] = new RectangleMesh(glm::vec3(0.2f, 0.6f, 0.2f));
+		leg[3] = new RectangleMesh(glm::vec3(0.2f, 0.6f, 0.2f));
 
 		CalcVerticesNormal(desk->Vertices, desk->Indices);
 		for (int i = 0; i < 4; i++) CalcVerticesNormal(leg[i]->Vertices, leg[i]->Indices);
@@ -574,7 +583,20 @@ public:
 
 		m_pdesk->Render(p.GetWVPTrans(), p.GetWorldTrans());
 
-		for(int i=0;i<4;i++) m_pleg[i]->Render(p.GetWVPTrans(), p.GetWorldTrans());
+        Pipeline p1;
+        p1.SetBaseMatrix(p.GetWorldTrans());
+        p1.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p1.SetPerspectiveProj(m_persParam);
+
+        p1.Translate(-0.2f, -0.4f, -0.2f);
+		m_pleg[0]->Render(p1.GetWVPTrans(), p1.GetWorldTrans());
+        p1.Translate(0.2f, -0.4f, -0.2f);
+        m_pleg[1]->Render(p1.GetWVPTrans(), p1.GetWorldTrans());
+        p1.Translate(-0.2f, -0.4f, 0.2f);
+        m_pleg[2]->Render(p1.GetWVPTrans(), p1.GetWorldTrans());
+        p1.Translate(0.2f, -0.4f, 0.2f);
+        m_pleg[3]->Render(p1.GetWVPTrans(), p1.GetWorldTrans());
+
 		m_pBasicLight->Disable();
 
 		return true;
@@ -739,16 +761,149 @@ private:
     float m_scale;
 };
 
-class App7 : public Scene
+
+class Lab7: public Scene
 {
 public:
-    App7() : Scene() {
+    Lab7() : Scene() {
+        broswerType = 0;
+        translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        clearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+        m_pMesh = nullptr;
+        m_pfileDialog = nullptr;
+        m_pTexture = nullptr;
+    }
+    ~Lab7() {
+        SAFE_DELETE(m_pMesh);
+        SAFE_DELETE(m_pfileDialog);
+        SAFE_DELETE(m_pTexture);
+    }
+    virtual bool Init() {
+        RectangleMesh rectangle(glm::vec3(1.0f, 1.0f, 1.0f));
+        m_pMesh = new Mesh();
+        m_pMesh->InitVertexMesh(rectangle.Vertices, rectangle.Indices, "pic/test.png");
+
+        // init modelCamera
+        SAFE_DELETE(m_pCamera);
+        m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pCamera->SetICallBack(this);
+        m_pCamera->Init();
+
+        m_pfileDialog = new ImGui::FileBrowser();
+        m_pfileDialog->SetTitle("title");
+
+        m_pTexture = new Texture(GL_TEXTURE_2D, "pic/test.png");
+        if (!m_pTexture->Load()) {
+            return false;
+        }
+        
+
+        return true;
+    }
+    virtual bool Render() {
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+        m_pBasicLight->Enable();
+        Pipeline p;
+        p.Translate(translation.x, 0.0f, 0.0f);
+        p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p.SetPerspectiveProj(m_persParam);
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans(), m_pTexture);
+        m_pBasicLight->Disable();
+
+        m_pfileDialog->Display();
+        if (m_pfileDialog->HasSelected()) {
+            if(broswerType == 0) {
+                SAFE_DELETE(m_pTexture);
+                m_pTexture = new Texture(GL_TEXTURE_2D, m_pfileDialog->GetSelected().string().c_str());
+                if (!m_pTexture->Load()) {
+                    return false;
+                }
+            } else if (broswerType == 1) {
+                SAFE_DELETE(m_pMesh);
+                m_pMesh = new Mesh();
+                if (!m_pMesh->LoadMesh(m_pfileDialog->GetSelected().string().c_str())) {
+                    return false;
+                }
+                printf("load mesh %s success\n", m_pfileDialog->GetSelected().string().c_str());
+            }
+            m_pfileDialog->ClearSelected();
+        }
+        {
+            ImGui::Begin("Lab7");
+            // Display some text (you can use a format string too)
+            ImGui::SliderFloat("Translation", &translation.x, 0.0f, 5.0f);
+            ImGui::ColorEdit3("clear color", (float*)&clearColor); // Edit 3 floats representing a color
+            // Edit 1 float using a slider from 0.0f to 1.0f    
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Checkbox("camera move", &cameraMoveFlag);
+            if(cameraMoveFlag){
+                SetKeyState(CALLBACK_KEY_w, CALLBACK_KEY_STATE_PRESS);
+            } else {
+                SetKeyState(CALLBACK_KEY_w, CALLBACK_KEY_STATE_RELEASE);
+            }
+            if(ImGui::Button("Change Texture")) {
+                m_pfileDialog->SetTypeFilters({ ".png", ".jpg", ".bmp" });
+                m_pfileDialog->Open();
+                broswerType = 0;
+            }
+            if(ImGui::Button("Change Mesh")) {
+                m_pfileDialog->SetTypeFilters({ ".obj", ".md2"});
+                m_pfileDialog->Open();
+                broswerType = 1;
+            }
+            if(ImGui::Button("Our Pymarid")) {
+                PyramidMesh pyramid(1.0f, 5.0f, 1.0f);
+                SAFE_DELETE(m_pMesh);
+                m_pMesh = new Mesh();
+                m_pMesh->InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/test.png");
+            }
+            if(ImGui::Button("Our Sphere")) {
+                SphereMesh sphere(1.0f, 36, 18);
+                sphere.buildVertices();
+                SAFE_DELETE(m_pMesh);
+                m_pMesh = new Mesh();
+                m_pMesh->InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/test.png");
+            }
+            if(ImGui::Button("Our Cube")) {
+                RectangleMesh rectangle(glm::vec3(1.0f, 1.0f, 1.0f));
+                SAFE_DELETE(m_pMesh);
+                m_pMesh = new Mesh();
+                m_pMesh->InitVertexMesh(rectangle.Vertices, rectangle.Indices, "pic/test.png");
+            }
+
+            ImGui::End();
+        }
+
+        ImGui::Render();
+        // // Draw
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+        return true;
+    }
+private:
+    Mesh* m_pMesh;
+    ImGui::FileBrowser* m_pfileDialog;
+    Texture* m_pTexture;
+private:
+    static int broswerType;
+    static glm::vec3 translation;
+    static glm::vec4 clearColor;
+};
+int Lab7::broswerType;
+glm::vec3 Lab7::translation;
+glm::vec4 Lab7::clearColor;
+
+class App8 : public Scene
+{
+public:
+    App8() : Scene() {
         m_pMesh = nullptr;
         m_pFloor = nullptr;
         m_pSkyBox = nullptr;
         m_pShadowMapEffect = nullptr;
     }
-    ~App7() {
+    ~App8() {
         SAFE_DELETE(m_pMesh);
         SAFE_DELETE(m_pFloor);
         SAFE_DELETE(m_pSkyBox);
@@ -920,7 +1075,8 @@ int main(int argc, char **argv)
     Scene* pScene4 = new App4();
     Scene* pScene5 = new Lab5();
     Scene* pScene6 = new Lab6();
-    Scene* pScene7 = new App7();
+    Scene* pScene7 = new Lab7();
+    Scene* pScene8 = new App8();
 
     controller.AddScene(pScene);
     controller.AddScene(pScene2);
@@ -929,6 +1085,7 @@ int main(int argc, char **argv)
     controller.AddScene(pScene5);
     controller.AddScene(pScene6);
     controller.AddScene(pScene7);
+    controller.AddScene(pScene8);
     controller.Run(argc, argv);
 
     delete pScene;

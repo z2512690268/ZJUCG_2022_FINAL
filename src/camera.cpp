@@ -234,7 +234,8 @@ void ModelCamera::OnMouse(int x, int y)
         == CALLBACK_MOUSE_STATE_RELEASE;
     int RButton = m_pCallback->GetMouseState(CALLBACK_MOUSE_BUTTON_RIGHT)
         == CALLBACK_MOUSE_STATE_RELEASE;
-    if(LButton && RButton) {
+    int Key = m_pCallback->GetKeyState(CALLBACK_KEY_w) == CALLBACK_KEY_STATE_RELEASE;
+    if((LButton && RButton) || Key) {
         m_mousePos.x = x;
         m_mousePos.y = y;
 

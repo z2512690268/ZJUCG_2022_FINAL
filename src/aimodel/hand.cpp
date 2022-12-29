@@ -54,6 +54,12 @@ int HandDetector::Handpose_Recognition(cv::Mat src){
     HandKeypoints.resize(nPoints);
     int ret = -1;
     HandKeypoints_Detect(src, HandKeypoints);
+	// 绘制手部关键点
+	for (int i = 0; i < nPoints; i++)
+	{
+		cv::circle(src, HandKeypoints[i], 5, cv::Scalar(0, 0, 255), -1);
+	}
+	imshow("HandKeypoints", src);
     ret = Handpose_Internal(HandKeypoints);
     printf("Handpose ret:%d\n", ret);
     return ret;

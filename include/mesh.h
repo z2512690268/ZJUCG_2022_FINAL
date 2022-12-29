@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include "texture.h"
 #include "utils.h"
+#include "physics/AABB.h"
 
 #define INDEX_BUFFER 0    
 #define POS_VB       1
@@ -70,6 +71,10 @@ public:
     int InitVertexMesh(const std::vector<Vertex>& Vertices,
                         const std::vector<unsigned int>& Indices,
                         const std::string& MaterialName);
+	
+	// bool ExportMesh(const std::string& Filename);
+
+	const AABB& GetAABB() const { return *m_pAABB; }
 
 protected:
     bool InitFromScene(const aiScene* pScene, const std::string& Filename);
@@ -89,6 +94,8 @@ protected:
     GLuint m_Buffers[6];
     std::vector<MeshEntry*> m_Entries;
     std::vector<Texture*> m_Textures;
+
+	AABB* m_pAABB;
 };
 
 
@@ -96,60 +103,11 @@ class RectangleMesh
 {
 public:
 	std::vector<Vertex> Vertices;
-	std::vector<unsigned int> Indices = {
-			0, 1, 2,
-			2, 1, 3,
-			4, 6, 5,
-			5, 6, 7,
-			0, 2, 4,
-			4, 2, 6,
-			1, 5, 3,
-			3, 5, 7,
-			8, 2, 9,
-			9, 2, 3,
-			0, 10, 1,
-			1, 10, 11,
-	};
-	RectangleMesh() {
-		mRsize = glm::vec3(1.0,1.0,1.0);
-		mRpos = glm::vec3(0.0, 0.0, 0.0);
-		Vertices = {
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-		};
-	};
+	std::vector<unsigned int> Indices;
 
-	RectangleMesh(glm::vec3 size, glm::vec3 pos) {
-		mRsize = size;
-		mRpos = pos;
-		Vertices = {
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2), glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x - mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2), glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y + mRsize.z / 2, mRpos.z + mRsize.y / 2),   glm::vec2(1.0f, 0.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z - mRsize.y / 2),  glm::vec2(0.0f, 1.0f)),
-			Vertex(glm::vec3(mRpos.x + mRsize.x / 2, mRpos.y - mRsize.z / 2, mRpos.z + mRsize.y / 2),  glm::vec2(1.0f, 1.0f)),
-		};
-	}
+	RectangleMesh(glm::vec3 size);
 private:
 	glm::vec3 mRsize;
-	glm::vec3 mRpos;
 };
 
 class PyramidMesh
@@ -197,6 +155,42 @@ private:
 
     std::vector<unsigned int> indices;
     std::vector<Vertex> vertices;
+};
+
+class Cylinder
+{
+public:
+    Cylinder(float baseRadius=1.f, float topRadius=1.f, float height=1.f, int sectorCount=36, int stackCount=1);
+    ~Cylinder() = default;
+
+    float getBaseRadius() const             { return _baseRadius; }
+    float getTopRadius() const              { return _topRadius; }
+    float getHeight() const                 { return _height; }
+    int getSectorCount() const              { return _sectorCount; }
+    int getStackCount() const               { return _stackCount; }
+	std::vector<Vertex> getVertices(void) const { return vertices; }
+	std::vector<unsigned int> getIndices(void) const { return indices; }
+    void set(float baseRadius, float topRadius, float height, int sectorCount, int stackCount);
+    void setBaseRadius(float radius);
+    void setTopRadius(float radius);
+    void setHeight(float radius);
+    void setSectorCount(int sectorCount);
+    void setStackCount(int stackCount);
+    void clearArray(void);
+    void buildVertices(void);
+    
+private:
+
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    
+    const int MIN_SECTORS = 3;
+    const int MIN_STACKS = 1;
+    float _baseRadius;
+    float _topRadius;
+    float _height;
+    int _sectorCount;
+    int _stackCount;
 };
 
 

@@ -84,6 +84,8 @@ protected:
     RealityGrabber *m_pRealityGrabber = NULL;
     int screen_grab_cnt;
     int screen_grab_switch;
+    int camera_switch;
+    int camera_cnt;
     int m_ret;
     HandDetector  m_handDetector;
 };

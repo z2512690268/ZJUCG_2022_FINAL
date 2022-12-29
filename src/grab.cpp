@@ -82,6 +82,8 @@ bool RealityGrabber::CloseReality()
 void RealityGrabber::GrabReality()
 {
 	(*m_pcap) >> realityImg;
+	// imshow
+	cv::imshow("Reality", realityImg);
 }
 
 void RealityGrabber::saveRealityImg(const std::string & str)

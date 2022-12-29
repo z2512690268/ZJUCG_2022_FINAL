@@ -1,6 +1,7 @@
 #include "mesh.h"
 #include "utils.h"
 #include "mathfunc.h"
+#include <fstream>
 
 #define POSITION_LOCATION 0
 #define TEX_COORD_LOCATION 1
@@ -12,6 +13,7 @@ Mesh::Mesh()
 {
     m_VAO = 0;
     memset(m_Buffers, 0, sizeof(m_Buffers));
+    m_pAABB = nullptr;
 }
 
 
@@ -37,6 +39,8 @@ void Mesh::Clear()
         glDeleteVertexArrays(1, &m_VAO);
         m_VAO = 0;
     }
+
+    SAFE_DELETE(m_pAABB);
 }
 
 
@@ -149,6 +153,9 @@ bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
     if (!InitMaterials(pScene, Filename)) {
         return false;
     }
+
+    SAFE_DELETE(m_pAABB);
+    m_pAABB = new AABB(Positions);
 
     return InitBuffers(Positions, Normals, TexCoords, Indices);
 }
@@ -316,6 +323,9 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
     }
     m_Entries.push_back(Entry);
 
+    SAFE_DELETE(m_pAABB);
+    m_pAABB = new AABB(Positions);
+
     glGenVertexArrays(1, &m_VAO);   
     glBindVertexArray(m_VAO);
 
@@ -328,6 +338,39 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
     int ret = m_Entries.size() - 1;
 
     return ret;
+}
+
+RectangleMesh::RectangleMesh(glm::vec3 size) {
+    mRsize = size;
+    Indices = {
+        0, 1, 2,
+        2, 1, 3,
+        4, 6, 5,
+        5, 6, 7,
+        0, 2, 4,
+        4, 2, 6,
+        1, 5, 3,
+        3, 5, 7,
+        8, 2, 9,
+        9, 2, 3,
+        0, 10, 1,
+        1, 10, 11,
+    };	
+    Vertices = {
+        Vertex(glm::vec3(-mRsize.x / 2, -mRsize.y / 2, -mRsize.z / 2), glm::vec2(0.0f, 0.0f)),
+        Vertex(glm::vec3(-mRsize.x / 2, -mRsize.y / 2, +mRsize.z / 2), glm::vec2(1.0f, 0.0f)),
+        Vertex(glm::vec3(-mRsize.x / 2, +mRsize.y / 2, -mRsize.z / 2), glm::vec2(0.0f, 1.0f)),
+        Vertex(glm::vec3(-mRsize.x / 2, +mRsize.y / 2, +mRsize.z / 2), glm::vec2(1.0f, 1.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, -mRsize.y / 2, -mRsize.z / 2),  glm::vec2(1.0f, 0.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, -mRsize.y / 2, +mRsize.z / 2),  glm::vec2(0.0f, 0.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, +mRsize.y / 2, -mRsize.z / 2),  glm::vec2(1.0f, 1.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, +mRsize.y / 2, +mRsize.z / 2),   glm::vec2(0.0f, 1.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, +mRsize.y / 2, -mRsize.z / 2),  glm::vec2(0.0f, 0.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, +mRsize.y / 2, +mRsize.z / 2),   glm::vec2(1.0f, 0.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, -mRsize.y / 2, -mRsize.z / 2),  glm::vec2(0.0f, 1.0f)),
+        Vertex(glm::vec3(+mRsize.x / 2, -mRsize.y / 2, +mRsize.z / 2),  glm::vec2(1.0f, 1.0f)),
+    };
+    CalcVerticesNormal(Vertices, Indices);
 }
 
 PyramidMesh::PyramidMesh(float edgelength, float edgenum, float height) {
@@ -496,5 +539,200 @@ SphereMesh::SphereMesh(float radius, int sectorCount, int stackCount)
     _sectorCount = 0;
     _stackCount = 0;
     set(radius, sectorCount, stackCount);
+    return;
+}
+
+Cylinder::Cylinder(float baseRadius, float topRadius, float height, int sectorCount, int stackCount) : _baseRadius(baseRadius), _topRadius(topRadius), _height(height), _sectorCount(sectorCount), _stackCount(stackCount)
+{
+    return;   
+}
+
+void Cylinder::setBaseRadius(float radius)
+{
+    if(radius != _baseRadius && radius >= 0)
+        _baseRadius = radius;
+    return;
+}
+
+void Cylinder::setTopRadius(float radius)
+{
+    if(radius != _topRadius && radius > 0)
+        _topRadius = radius;
+    return;
+}
+
+void Cylinder::setHeight(float height)
+{
+    if(height != _height && height > 0)
+        _height = height;
+    return;
+}
+
+void Cylinder::setSectorCount(int sectorCount)
+{
+    if(sectorCount != _sectorCount && sectorCount > 0)
+        _sectorCount = sectorCount;
+    return;
+}
+
+void Cylinder::setStackCount(int stackCount)
+{
+    if(stackCount != _stackCount && stackCount > 0)
+        _stackCount = stackCount;
+    return;
+}
+
+void Cylinder::set(float baseRadius, float topRadius, float height, int sectorCount, int stackCount)
+{
+    setHeight(height);
+    setBaseRadius(baseRadius);
+    setTopRadius(topRadius);
+    setSectorCount(sectorCount);
+    setStackCount(stackCount);
+    return;
+}
+
+void Cylinder::clearArray(void)
+{
+    vertices.clear();
+    return;
+}
+
+// 从 h/2 到 -h/2
+// 使用向量的伸缩来构建
+// 由方程可知任意一个圆的半径 r = (h / 2 - z)*(baseR - topR) / h + topR 
+// x、y坐标放大相同倍数即r倍
+void Cylinder::buildVertices(void)
+{
+    clearArray();
+
+    float sectorStride = 2 * PI / _sectorCount;
+    float stackStride = _height / _stackCount;
+
+    std::vector<float> unitPos;
+    // 计算单位圆坐标
+    float x = 0, y = 0;
+    for(unsigned int i = 0; i < _sectorCount; i++)
+    {
+        x = cos(i * sectorStride);
+        y = sin(i * sectorStride);
+        unitPos.push_back(x);
+        unitPos.push_back(y);
+    }
+    // 计算一个圆圈的法向量
+    float zAngle = atan2(_baseRadius - _topRadius, _height);
+    float x0 = cos(zAngle);
+    float z0 = sin(zAngle);
+
+    std::vector<float> normals;
+    for(int i = 0; i <= _sectorCount; i++)
+    {
+        // 将初始法向量绕着z轴旋转
+        // --           --
+        // |  cos   -sin |
+        // |  sin    cos |
+        // --           --
+        // 初始y0 = 0
+        float angle = i * sectorStride;
+        normals.push_back(cos(angle) * x0);     // x
+        normals.push_back(sin(angle) * x0);     // y
+        normals.push_back(z0);                  // z
+    }
+
+    unsigned int count = unitPos.size() / 2;
+
+    for(unsigned int i = 0; i < _stackCount; i++)
+    {
+        float z = _height / 2 - i * stackStride;
+        float r = (_height / 2 - z) * (_baseRadius - _topRadius) / _height + _topRadius;
+        float t = 1.f - (float) i / _stackCount;
+
+        
+        for(unsigned int j = 0, k = 0; j < _sectorCount; j++, k += 2)
+        {
+            float x = unitPos[k];
+            float y = unitPos[k + 1];
+            float u = (float)j / _sectorCount;
+            vertices.push_back(Vertex(glm::vec3(x, y, z), glm::vec2(u, t), glm::vec3(normals[k], normals[k+1], normals[k+2])));
+        }
+    }
+
+    // 圆锥底的顶点
+    unsigned int baseVertexIdx = (unsigned int) vertices.size();
+
+    float z = -_height * 0.5f;
+    vertices.push_back(Vertex(glm::vec3(0, 0, z), glm::vec2(0.5f, 0.5f), glm::vec3(0, 0, -1)));
+    for(int i = 0, j = 0; i < _sectorCount; i++, j += 3)
+    {
+        x = unitPos[j];
+        y = unitPos[j+1];
+        auto pos = glm::vec3(x * _baseRadius, y * _baseRadius, z);
+        auto tex = glm::vec2(-x * 0.5f + 0.5f, -y * 0.5f + 0.5f);
+        auto normal = glm::vec3(0, 0, -1);
+        vertices.push_back(Vertex(pos, tex, normal));
+    }
+
+    // 圆锥顶的顶点
+    unsigned int topVertexIdx = (unsigned int)vertices.size();
+
+    z = _height;
+    vertices.push_back(Vertex(glm::vec3(0, 0, z), glm::vec2(0.5f, 0.5f), glm::vec3(0, 0, 1)));
+    for(int i = 0, j = 0; i < _sectorCount; i++, j += 3)
+    {
+        x = unitPos[j];
+        y = unitPos[j+1];
+        vertices.push_back(Vertex(
+            glm::vec3(x * _topRadius, y * _topRadius, z),
+            glm::vec2(x * 0.5f + 0.5f, -y * 0.5f + 0.5f),
+            glm::vec3(0, 0, 1)
+        ));
+    }
+
+    // 设定索引
+    // 侧面的索引
+    unsigned int k1, k2;
+    for(int i = 0; i < _stackCount; i++)
+    {
+        k1 = i * (_sectorCount + 1);
+        k2 = k1 + _sectorCount + 1;
+
+        for(int j = 0; j < _sectorCount; j++, k1++, k2++)
+        {
+            indices.push_back(k1);
+            indices.push_back(k1 + 1);
+            indices.push_back(k2);
+
+            indices.push_back(k2);
+            indices.push_back(k1 + 1);
+            indices.push_back(k2 + 1);
+        }
+    }
+
+    auto addIdx = [&](int k1, int k2, int k3)
+    {
+        indices.push_back(k1);
+        indices.push_back(k2);
+        indices.push_back(k3);
+    };
+
+    // 底面的索引
+    unsigned int baseIdx = (unsigned int)indices.size();
+    for(int i = 0, k = baseVertexIdx + 1; i < _sectorCount; i++, k++)
+    {
+        if(i < (_sectorCount - 1))
+            addIdx(baseVertexIdx, k + 1, k);
+        else
+            addIdx(baseVertexIdx, baseVertexIdx + 1, k);
+    }
+
+    // 顶部的索引
+    unsigned int topIdx = (unsigned int)indices.size();
+    for(int i = 0, k = topVertexIdx + 1; i < _sectorCount; i++, k++)
+    {
+        if(i < (_sectorCount - 1))
+            addIdx(topVertexIdx, k, k + 1);
+        else 
+            addIdx(topVertexIdx, k, topVertexIdx + 1);
+    }
     return;
 }

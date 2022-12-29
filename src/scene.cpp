@@ -39,7 +39,6 @@ bool Scene::Preinit(int argc, char **argv) {
     snprintf(game_mode_string, sizeof(game_mode_string), "%dx%d@60", GAMEMODE_WINDOW_WIDTH, GAMEMODE_WINDOW_HEIGHT);
     glutGameModeString(game_mode_string);
     glutEnterGameMode();
-    glutSetCursor(GLUT_CURSOR_NONE);
 
     // GLEW Init
     glewInit();
@@ -102,6 +101,7 @@ bool Scene::Preinit(int argc, char **argv) {
     m_pScreenGraber = new ScreenGraber();
     screen_grab_cnt = 0;
     screen_grab_switch = 0;
+    camera_cnt = 0;
     m_pRealityGrabber = new RealityGrabber();
     return true;
 };
@@ -133,6 +133,13 @@ bool Scene::PostRender() {
         if(screen_grab_cnt > 15) {
             m_pScreenGraber->GrabScreen();
             screen_grab_cnt = 0;
+        }
+    }
+    if(camera_switch) {
+        camera_cnt++;
+        if(camera_cnt > 3){
+            m_pRealityGrabber->GrabReality();
+            camera_cnt = 0;
         }
     }
     return true;
@@ -205,18 +212,29 @@ void Scene::KeyboardCB(CALLBACK_KEY Key, CALLBACK_KEY_STATE KeyState, int x, int
                 screen_grab_switch = !screen_grab_switch;
                 break;
             case CALLBACK_KEY_o:
-                m_pRealityGrabber->OpenReality();
-                m_pRealityGrabber->GrabReality();
-                m_pRealityGrabber->CloseReality();
-                m_pRealityGrabber->saveRealityImg("output/real.png");
+                if(camera_switch){
+                    m_pRealityGrabber->saveRealityImg("output/real.png");
+                }
                 break;
             case CALLBACK_KEY_k:
-                m_pRealityGrabber->OpenReality();
-                m_pRealityGrabber->GrabReality();
-                m_pRealityGrabber->CloseReality();
+                if(!camera_switch){
+                    m_pRealityGrabber->OpenReality();
+                    camera_switch = 1;
+                    camera_cnt = 0;
+                }else {
+                    m_pRealityGrabber->CloseReality();
+                    camera_switch = 0;
+                }
+                break;
+            case CALLBACK_KEY_m:
+                if(!camera_switch){
+                    m_pRealityGrabber->OpenReality();
+                    m_pRealityGrabber->GrabReality();
+                }
                 int ret = m_handDetector.Handpose_Recognition(m_pRealityGrabber->getRealityImg());
                 if(ret > 0){
                     m_ret = ret;
+                    m_pRealityGrabber->CloseReality();
                     glutLeaveMainLoop();
                 }
                 break;

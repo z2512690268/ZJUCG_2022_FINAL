@@ -74,7 +74,7 @@ struct Transform
 
     glm::mat4x4 GetMatrix() const
     {
-        return m_base * GetLocalMatrix();
+        return GetLocalMatrix() * m_base;
     }
 };
 

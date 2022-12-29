@@ -20,6 +20,7 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="packages\assimp\dll\assimp-vc143-mt.dll" />
+    <None Include="packages\Opencv4VS\dll\opencv_world455.dll" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
