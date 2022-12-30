@@ -297,6 +297,10 @@ void ModelCamera::Update()
 }
 
 void ModelCamera::OnWheel(int Direction) {
+    int Key = m_pCallback->GetKeyState(CALLBACK_KEY_w) == CALLBACK_KEY_STATE_RELEASE;
+    if (Key) {
+        return;
+    }
     if (Direction > 0) {
         m_radius -= 1.0f;
     }

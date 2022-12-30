@@ -29,6 +29,7 @@
 #include "shadow_map_fbo.h"
 #include "picking.h"
 #include "gui/imfilebrowser.h"
+#include "model/bezierface.h"
 
 static const float FieldDepth = 50.0f;
 static const float FieldWidth = 25.0f;
@@ -638,11 +639,8 @@ public:
 
         m_directionalLight.DiffuseIntensity = 0.5f;
 
-        for(int i = 0; i < sphereCount; i++)
-        {
-            m_sphere.InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
-            m_pyraid.InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/007FFF.jpg");
-        }
+        m_sphere.InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
+        m_pyraid.InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/007FFF.jpg");
 
         if (!m_pickingTexture.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
             return false;
@@ -797,7 +795,8 @@ public:
         if (!m_pTexture->Load()) {
             return false;
         }
-        
+
+
 
         return true;
     }
@@ -885,6 +884,7 @@ private:
     Mesh* m_pMesh;
     ImGui::FileBrowser* m_pfileDialog;
     Texture* m_pTexture;
+    Mesh* m_sphere;
 private:
     static int broswerType;
     static glm::vec3 translation;
@@ -1066,6 +1066,194 @@ private:
     ShadowMapTechnique* m_pShadowMapEffect;
 };
 
+class App9: public Scene
+{
+public:
+    App9() : Scene() {
+        broswerType = 0;
+        clearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
+        showCtrlPoint = false;
+        showMesh = true;
+        ctrlPoints = std::vector<glm::vec2>({
+            glm::vec2(0.0f, 1.0f),
+            glm::vec2(0.6f, 0.8f),
+            glm::vec2(0.8f, 0.6f),
+            glm::vec2(0.6f, 0.4f),
+            glm::vec2(0.4f, 0.2f),
+            glm::vec2(0.2f, 0.0f),
+            glm::vec2(0.0f, 0.0f),
+        });
+        ctrlPointNum = ctrlPoints.size();
+
+        m_pMesh = nullptr;
+        m_pfileDialog = nullptr;
+        m_pTexture = nullptr;
+        m_pSphereMesh = nullptr;
+    }
+    ~App9() {
+        SAFE_DELETE(m_pMesh);
+        SAFE_DELETE(m_pfileDialog);
+        SAFE_DELETE(m_pTexture);
+        SAFE_DELETE(m_pSphereMesh);
+    }
+    virtual bool Init() {
+        RectangleMesh rectangle(glm::vec3(1.0f, 1.0f, 1.0f));
+        m_pMesh = new Mesh();
+        m_pMesh->InitVertexMesh(rectangle.Vertices, rectangle.Indices, "pic/test.png");
+
+        // init modelCamera
+        SAFE_DELETE(m_pCamera);
+        m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pCamera->SetICallBack(this);
+        m_pCamera->Init();
+
+        m_pfileDialog = new ImGui::FileBrowser();
+        m_pfileDialog->SetTitle("title");
+
+        m_pTexture = new Texture(GL_TEXTURE_2D, "pic/test.png");
+        if (!m_pTexture->Load()) {
+            return false;
+        }
+
+        SphereMesh sphere;
+        sphere.set(0.05, 36, 18);
+        sphere.buildVertices();
+
+        m_directionalLight.DiffuseIntensity = 0.5f;
+
+        m_pSphereMesh = new Mesh();
+        m_pSphereMesh->InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
+
+        return true;
+    }
+    virtual bool Render() {
+        glDisable(GL_CULL_FACE);
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+        m_pBasicLight->Enable();
+        Pipeline p;
+        p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p.SetPerspectiveProj(m_persParam);
+        if(showMesh){
+            m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans(), m_pTexture);
+        }
+        if(showCtrlPoint){
+            for(int i = 0; i < ctrlPointNum; ++i) {
+                Pipeline p2;
+                p2.Translate(ctrlPoints[i].x, ctrlPoints[i].y, 0.0);
+                p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+                p2.SetPerspectiveProj(m_persParam);
+                m_pSphereMesh->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
+            }
+        }
+        m_pBasicLight->Disable();
+
+        m_pfileDialog->Display();
+        if (m_pfileDialog->HasSelected()) {
+            if(broswerType == 0) {
+                SAFE_DELETE(m_pTexture);
+                m_pTexture = new Texture(GL_TEXTURE_2D, m_pfileDialog->GetSelected().string().c_str());
+                if (!m_pTexture->Load()) {
+                    return false;
+                }
+            } else if (broswerType == 1) {
+                SAFE_DELETE(m_pMesh);
+                m_pMesh = new Mesh();
+                if (!m_pMesh->LoadMesh(m_pfileDialog->GetSelected().string().c_str())) {
+                    return false;
+                }
+                printf("load mesh %s success\n", m_pfileDialog->GetSelected().string().c_str());
+            }
+            m_pfileDialog->ClearSelected();
+        }
+        {
+            ImGui::Begin("App9");
+            // Display some text (you can use a format string too)
+            ImGui::ColorEdit3("clear color", (float*)&clearColor); // Edit 3 floats representing a color
+            // Edit 1 float using a slider from 0.0f to 1.0f    
+            if(ImGui::Button("Reset Camera")) {
+                // reset modelCamera
+                SAFE_DELETE(m_pCamera);
+                m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+                m_pCamera->SetICallBack(this);
+                m_pCamera->Init();
+            }
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            ImGui::Checkbox("camera move", &cameraMoveFlag);
+            ImGui::Checkbox("show ctrl points", &showCtrlPoint);
+            ImGui::Checkbox("show mesh", &showMesh);
+            if(cameraMoveFlag){
+                SetKeyState(CALLBACK_KEY_w, CALLBACK_KEY_STATE_PRESS);
+            } else {
+                SetKeyState(CALLBACK_KEY_w, CALLBACK_KEY_STATE_RELEASE);
+            }
+            if(ImGui::Button("Change Texture")) {
+                m_pfileDialog->SetTypeFilters({ ".png", ".jpg", ".bmp" });
+                m_pfileDialog->Open();
+                broswerType = 0;
+            }
+            ImGui::Text("Please Click the following button at first to update mesh");
+            if(ImGui::Button("Update Mesh By CtrlPoints")) {
+                SAFE_DELETE(m_pMesh);
+                m_pMesh = new Mesh();
+                
+                std::vector<Vertex> vertices;
+                std::vector<unsigned int> indices;
+
+                int cur_index = 0;
+                for (int i = 0; i + 3 < ctrlPoints.size(); i += 3) {
+                    std::vector<glm::vec2> temp_ctrlPoints(ctrlPoints.begin() + i, ctrlPoints.begin() + i + 4);
+
+                    BezierFace bezierFace(temp_ctrlPoints);
+                    for(int i = 0; i < bezierFace.getVertices().size(); ++i) {
+                        vertices.push_back(Vertex(bezierFace.getVertices()[i], bezierFace.getTexCoords()[i], bezierFace.getNormals()[i]));
+                    }
+                    for(int i = 0; i < bezierFace.getIndices().size(); ++i) {
+                        indices.push_back(bezierFace.getIndices()[i] + cur_index);
+                    }
+                    cur_index = vertices.size();
+                }
+                m_pMesh->InitVertexMesh(vertices, indices, "pic/test.png");
+            }
+            ImGui::Text("control points in range 0-3\nand 3-6, 6-9... would be a face\nLess than 3 points would be ignored");
+            for(int i = 0; i < ctrlPointNum; ++i) {
+                ImGui::DragFloat2(("ctrlPoint" + std::to_string(i)).c_str(), (float*)&ctrlPoints[i], 0.01f, -5.0f, 5.0f);
+                if(ImGui::Button(("delete ctrlPoint" + std::to_string(i)).c_str())) {
+                    ctrlPoints.erase(ctrlPoints.begin() + i);
+                    --ctrlPointNum;
+                    break;
+                }
+                if(i > 0 && i % 3 == 0) {
+                    ImGui::Separator();
+                    ImGui::Text("Face part %d", i / 3);
+                }
+            }
+            if(ImGui::Button("Add CtrlPoint")) {
+                ctrlPoints.push_back(glm::vec2(0.0f, 0.0f));
+                ++ctrlPointNum;
+            }
+            ImGui::End();
+        }
+
+        ImGui::Render();
+        // // Draw
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+        return true;
+    }
+private:
+    Mesh* m_pMesh;
+    ImGui::FileBrowser* m_pfileDialog;
+    Texture* m_pTexture;
+    Mesh* m_pSphereMesh;
+private:
+    int broswerType;
+    glm::vec4 clearColor;
+    int ctrlPointNum;
+    std::vector<glm::vec2> ctrlPoints;
+    bool showCtrlPoint;
+    bool showMesh;
+};
+
 int main(int argc, char **argv)
 { 
     SceneController controller;
@@ -1077,6 +1265,7 @@ int main(int argc, char **argv)
     Scene* pScene6 = new Lab6();
     Scene* pScene7 = new Lab7();
     Scene* pScene8 = new App8();
+    Scene* pScene9 = new App9();
 
     controller.AddScene(pScene);
     controller.AddScene(pScene2);
@@ -1086,6 +1275,7 @@ int main(int argc, char **argv)
     controller.AddScene(pScene6);
     controller.AddScene(pScene7);
     controller.AddScene(pScene8);
+    controller.AddScene(pScene9);
     controller.Run(argc, argv);
 
     delete pScene;

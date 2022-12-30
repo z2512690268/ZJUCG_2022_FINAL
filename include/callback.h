@@ -131,6 +131,7 @@ class ICallbacks
 private:
     CALLBACK_KEY_STATE key_states[256];
     CALLBACK_MOUSE_STATE mouse_states[3];
+    int mouse_x, mouse_y;
 private:
 public:
     CALLBACK_KEY_STATE GetKeyState(CALLBACK_KEY Key) {
