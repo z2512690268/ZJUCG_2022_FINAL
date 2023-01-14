@@ -95,6 +95,11 @@ protected:
     std::vector<MeshEntry*> m_Entries;
     std::vector<Texture*> m_Textures;
 
+    std::vector<glm::vec3> m_Positions;
+    std::vector<glm::vec3> m_Normals;
+    std::vector<glm::vec2> m_TexCoords;
+    std::vector<unsigned int> m_Indices;
+
 	AABB* m_pAABB;
 };
 

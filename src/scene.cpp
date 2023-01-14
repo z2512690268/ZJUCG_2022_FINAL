@@ -1,9 +1,10 @@
 #include "scene.h"
 
-Scene::Scene() {
+Scene::Scene(CAMERA_MODE camera_mode) {
     m_pCamera = nullptr;
     m_pBasicLight = nullptr;
     m_pScreenGraber = nullptr;
+    m_camera_mode = camera_mode;
 }
 Scene::~Scene() {
     SAFE_DELETE(m_pCamera);
@@ -93,9 +94,16 @@ bool Scene::Preinit(int argc, char **argv) {
     m_persParam.zFar = 100.0f;
 
     // init camera
-    m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_pCamera->SetICallBack(this);
-    m_pCamera->Init();
+    if (m_camera_mode == MOVE_CAMERA){
+        m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pCamera->SetICallBack(this);
+        m_pCamera->Init();
+    } else if (m_camera_mode == MODEL_CAMERA) {
+        // init modelCamera
+        m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+        m_pCamera->SetICallBack(this);
+        m_pCamera->Init();
+    }
 
     // init graber
     m_pScreenGraber = new ScreenGraber();

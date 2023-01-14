@@ -16,10 +16,15 @@
 #include <imm.h>
 #pragma comment (lib ,"imm32.lib")
 
+enum CAMERA_MODE {
+    MOVE_CAMERA = 0,
+    MODEL_CAMERA
+};
+
 class Scene : public ICallbacks
 {
 public:
-    Scene();
+    Scene(CAMERA_MODE camera_mode); 
     ~Scene();
 
     //*************************************
@@ -87,6 +92,7 @@ protected:
     int camera_switch;
     int camera_cnt;
     int m_ret;
+    CAMERA_MODE m_camera_mode;
     HandDetector  m_handDetector;
 };
 

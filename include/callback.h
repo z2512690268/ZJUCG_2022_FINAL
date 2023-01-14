@@ -150,6 +150,14 @@ public:
         return mouse_states[Button] = State;
     }
 
+    int GetMouseX() {return mouse_x; }
+    int GetMouseY() {return mouse_y; }
+    void SetMouse(int x, int y) {
+        mouse_x = x;
+        mouse_y = y;
+        SetCursorPos(x, y);
+    }
+
     virtual void KeyboardCB(CALLBACK_KEY Key, CALLBACK_KEY_STATE KeyState, int x, int y) {};
     
     virtual void PassiveMouseCB(int x, int y) {};

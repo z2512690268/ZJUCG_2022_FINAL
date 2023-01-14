@@ -119,11 +119,6 @@ bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
     m_Entries.resize(pScene->mNumMeshes);
     m_Textures.resize(pScene->mNumMaterials);
 
-    std::vector<glm::vec3> Positions;
-    std::vector<glm::vec3> Normals;
-    std::vector<glm::vec2> TexCoords;
-    std::vector<unsigned int> Indices;
-
     unsigned int NumVertices = 0;
     unsigned int NumIndices = 0;
 
@@ -139,25 +134,30 @@ bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
         NumIndices  += m_Entries[i]->NumIndices;
     }
 
+    m_Positions.clear();
+    m_Normals.clear();
+    m_TexCoords.clear();
+    m_Indices.clear();
+
     // Reserve space in the vectors for the vertex attributes and indices
-    Positions.reserve(NumVertices);
-    Normals.reserve(NumVertices);
-    TexCoords.reserve(NumVertices);
-    Indices.reserve(NumIndices);
+    m_Positions.reserve(NumVertices);
+    m_Normals.reserve(NumVertices);
+    m_TexCoords.reserve(NumVertices);
+    m_Indices.reserve(NumIndices);
 
     // Initialize the meshes in the scene one by one
     for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
         const aiMesh* paiMesh = pScene->mMeshes[i];
-        InitMesh(paiMesh, Positions, Normals, TexCoords, Indices);
+        InitMesh(paiMesh, m_Positions, m_Normals, m_TexCoords, m_Indices);
     }
     if (!InitMaterials(pScene, Filename)) {
         return false;
     }
 
     SAFE_DELETE(m_pAABB);
-    m_pAABB = new AABB(Positions);
+    m_pAABB = new AABB(m_Positions);
 
-    return InitBuffers(Positions, Normals, TexCoords, Indices);
+    return InitBuffers(m_Positions, m_Normals, m_TexCoords, m_Indices);
 }
 
 void Mesh::InitMesh(const aiMesh* paiMesh,
@@ -308,30 +308,33 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
     Entry->BaseIndex = 0;
     Entry->MaterialIndex = tex_id;
 
-    std::vector<glm::vec3> Positions;
-    std::vector<glm::vec2> TexCoords;
-    std::vector<glm::vec3> Normals;
+    m_Positions.clear();
+    m_TexCoords.clear();
+    m_Normals.clear();
 
-    Positions.reserve(NumVertices);
-    TexCoords.reserve(NumVertices);
-    Normals.reserve(NumVertices);
+    m_Positions.reserve(NumVertices);
+    m_TexCoords.reserve(NumVertices);
+    m_Normals.reserve(NumVertices);
+
+    m_Indices = Indices;
+
 
     for (int i = 0 ; i < NumVertices ; i++) {
-        Positions.push_back(Vertices[i].m_pos);
-        TexCoords.push_back(Vertices[i].m_tex);
-        Normals.push_back(Vertices[i].m_normal);
+        m_Positions.push_back(Vertices[i].m_pos);
+        m_TexCoords.push_back(Vertices[i].m_tex);
+        m_Normals.push_back(Vertices[i].m_normal);
     }
     m_Entries.push_back(Entry);
 
     SAFE_DELETE(m_pAABB);
-    m_pAABB = new AABB(Positions);
+    m_pAABB = new AABB(m_Positions);
 
     glGenVertexArrays(1, &m_VAO);   
     glBindVertexArray(m_VAO);
 
     // Create the buffers for the vertices attributes
     glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
-    InitBuffers(Positions, Normals, TexCoords, Indices);
+    InitBuffers(m_Positions, m_Normals, m_TexCoords, m_Indices);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
