@@ -131,8 +131,8 @@ void MoveCamera::OnMouse(int x, int y)
     m_mousePos.x = x;
     m_mousePos.y = y;
 
-    m_AngleH += (float)DeltaX / 20.0f;
-    m_AngleV += (float)DeltaY / 20.0f;
+    m_AngleH += (float)DeltaX / 5.0f;
+    m_AngleV += (float)DeltaY / 5.0f;
 
     if (DeltaX == 0) {
         if (x <= MARGIN) {
@@ -234,7 +234,7 @@ void ModelCamera::OnMouse(int x, int y)
         == CALLBACK_MOUSE_STATE_RELEASE;
     int RButton = m_pCallback->GetMouseState(CALLBACK_MOUSE_BUTTON_RIGHT)
         == CALLBACK_MOUSE_STATE_RELEASE;
-    int Key = m_pCallback->GetKeyState(CALLBACK_KEY_w) == CALLBACK_KEY_STATE_RELEASE;
+    int Key = m_pCallback->GetKeyState(CALLBACK_KEY_ESCAPE) == CALLBACK_KEY_STATE_RELEASE;
     if((LButton && RButton) || Key) {
         m_mousePos.x = x;
         m_mousePos.y = y;
