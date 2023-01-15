@@ -128,13 +128,17 @@ bool Scene::PreRender() {
     m_pBasicLight->SetEyeWorldPos(m_pCamera->GetPos());
     m_pBasicLight->Disable();
 
+    // printf("Check7\n");
     return true;
 };
 
 bool Scene::PostRender() {
     // 检查长按事件
+    // printf("Check2\n");
     CheckKeyBoard();
+    // printf("Check3\n");
     glutSwapBuffers();
+    // printf("Check4\n");
     // 处理图像存储
     if(screen_grab_switch) {
         screen_grab_cnt++;
@@ -143,6 +147,7 @@ bool Scene::PostRender() {
             screen_grab_cnt = 0;
         }
     }
+    // printf("Check5\n");
     if(camera_switch) {
         camera_cnt++;
         if(camera_cnt > 3){
@@ -150,6 +155,7 @@ bool Scene::PostRender() {
             camera_cnt = 0;
         }
     }
+    // printf("Check6\n");
     return true;
 };
 

@@ -297,7 +297,7 @@ void ModelCamera::Update()
 }
 
 void ModelCamera::OnWheel(int Direction) {
-    int Key = m_pCallback->GetKeyState(CALLBACK_KEY_w) == CALLBACK_KEY_STATE_RELEASE;
+    int Key = m_pCallback->GetKeyState(CALLBACK_KEY_ESCAPE) == CALLBACK_KEY_STATE_RELEASE;
     if (Key) {
         return;
     }
