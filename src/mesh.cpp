@@ -151,6 +151,7 @@ bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
         InitMesh(paiMesh, m_Positions, m_Normals, m_TexCoords, m_Indices);
     }
     if (!InitMaterials(pScene, Filename)) {
+        printf("Error loading materials\n");
         return false;
     }
 

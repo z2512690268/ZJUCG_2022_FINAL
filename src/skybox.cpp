@@ -106,7 +106,11 @@ bool SkyBox::Init(const std::string& Directory,
 
     m_pMesh = new Mesh();
 
-    return m_pMesh->LoadMesh("mesh/sphere.obj");
+    int ret = m_pMesh->LoadMesh("mesh/sphere.obj");
+    if(!ret) {
+        printf("Loading Skybox Mesh Failure!\n");
+    }
+    return ret;
 }
 
 

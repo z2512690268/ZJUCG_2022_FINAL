@@ -122,18 +122,30 @@ public:
             model_joint_bind_part[i] = i + 1;
         }
 
+        space_station_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+        space_station_rot = glm::vec3(0.0f, 0.0f, 0.0f);
+        space_station_scale = glm::vec3(1.0f, 1.0f, 1.0f);
         // init skybox
         m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
 
-        if (!m_pSkyBox->Init("pic",
-                "stars_right.jpg",
-                "stars_left.jpg",
-                "stars_top.jpg",
-                "stars_bot.jpg",
-                "stars_front.jpg",
-                "stars_back.jpg")) {
-            return false;
-        }
+        // if (!m_pSkyBox->Init("pic",
+        //         "stars_right.jpg",
+        //         "stars_left.jpg",
+        //         "stars_top.jpg",
+        //         "stars_bot.jpg",
+        //         "stars_front.jpg",
+        //         "stars_back.jpg")) {
+        //         // "sp3right.jpg",
+        //         // "sp3left.jpg",
+        //         // "sp3top.jpg",
+        //         // "sp3bot.jpg",
+        //         // "sp3front.jpg",
+        //         // "sp3back.jpg")) {
+        //     printf("Failed to init skybox\n");
+        //     return false;
+        // }
+
+        space_station_mesh.LoadMesh("mesh/space_station.obj");
         return true;
     }
 
@@ -144,36 +156,45 @@ public:
         /// 渲染机械臂模型
         // printf("Check8\n");
         m_pBasicLight->Enable();
-        Pipeline pbase;
-        for(int i = 0; i < model_part_num; ++i) {
-            Pipeline p;
-            p.SetBaseMatrix(pbase.GetWorldTrans());
-            glm::vec3 trans = glm::vec3(0.0f);
-            glm::vec3 rots = glm::vec3(0.0f);
-            for(int j = 0; j < model_joint_num; ++j) {
-                if(model_joint_bind_part[j] == i){
-                    if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_X) rots.x += model_joint_angle[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Y) rots.y += model_joint_angle[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Z) rots.z += model_joint_angle[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_X) trans.x += model_joint_angle[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Y) trans.y += model_joint_angle[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Z) trans.z += model_joint_angle[j]; 
-                }
-            }
-            p.Translate(model_part_pos[i]->x, model_part_pos[i]->y, model_part_pos[i]->z);
-            p.Rotate(model_part_rot[i]->x, model_part_rot[i]->y, model_part_rot[i]->z);
-            p.SetBaseMatrix(p.GetWorldTrans());
-            p.Translate(trans.x, trans.y, trans.z);
-            p.Rotate(rots.x, rots.y, rots.z);
-            p.Scale(model_part_scale[i]->x, model_part_scale[i]->y, model_part_scale[i]->z);
-            p.SetCamera(*m_pCamera);
-            p.SetPerspectiveProj(m_persParam);
-            model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
-            pbase.SetBaseMatrix(p.GetWorldTrans());
-            pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
-        }
+        // Pipeline pbase;
+        // for(int i = 0; i < model_part_num; ++i) {
+        //     Pipeline p;
+        //     p.SetBaseMatrix(pbase.GetWorldTrans());
+        //     glm::vec3 trans = glm::vec3(0.0f);
+        //     glm::vec3 rots = glm::vec3(0.0f);
+        //     for(int j = 0; j < model_joint_num; ++j) {
+        //         if(model_joint_bind_part[j] == i){
+        //             if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_X) rots.x += model_joint_angle[j];
+        //             else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Y) rots.y += model_joint_angle[j];
+        //             else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Z) rots.z += model_joint_angle[j];
+        //             else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_X) trans.x += model_joint_angle[j];
+        //             else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Y) trans.y += model_joint_angle[j];
+        //             else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Z) trans.z += model_joint_angle[j]; 
+        //         }
+        //     }
+        //     p.Translate(model_part_pos[i]->x, model_part_pos[i]->y, model_part_pos[i]->z);
+        //     p.Rotate(model_part_rot[i]->x, model_part_rot[i]->y, model_part_rot[i]->z);
+        //     p.SetBaseMatrix(p.GetWorldTrans());
+        //     p.Translate(trans.x, trans.y, trans.z);
+        //     p.Rotate(rots.x, rots.y, rots.z);
+        //     p.Scale(model_part_scale[i]->x, model_part_scale[i]->y, model_part_scale[i]->z);
+        //     p.SetCamera(*m_pCamera);
+        //     p.SetPerspectiveProj(m_persParam);
+        //     model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
+        //     pbase.SetBaseMatrix(p.GetWorldTrans());
+        //     pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
+        // }
+
+        // 渲染空间站
+        Pipeline p;
+        p.SetCamera(*m_pCamera);
+        p.SetPerspectiveProj(m_persParam);
+        p.Translate(space_station_pos.x, space_station_pos.y, space_station_pos.z);
+        p.Rotate(space_station_rot.x, space_station_rot.y, space_station_rot.z);
+        p.Scale(space_station_scale.x, space_station_scale.y, space_station_scale.z);
+        space_station_mesh.Render(p.GetWVPTrans(), p.GetWorldTrans());
         m_pBasicLight->Disable();
-        m_pSkyBox->Render();
+        // m_pSkyBox->Render();
 
         // 渲染文件管理器
         m_fileDialog.Display();
@@ -276,6 +297,7 @@ public:
                 show_generate_model_window = true;
                 show_model_joint_window = false;
                 show_model_angle_window = false;
+                show_scene_window = false;
             }
             ImGui::SameLine();
             if(ImGui::Button("edit joint"))
@@ -283,6 +305,7 @@ public:
                 show_model_joint_window = true;
                 show_generate_model_window = false;
                 show_model_angle_window = false;
+                show_scene_window = false;
             }
             ImGui::SameLine();
             if(ImGui::Button("angle ctrl"))
@@ -290,6 +313,14 @@ public:
                 show_model_angle_window = true;
                 show_generate_model_window = false;
                 show_model_joint_window = false;
+                show_scene_window = false;
+            }
+            if(ImGui::Button("scene"))
+            {
+                show_scene_window = true;
+                show_generate_model_window = false;
+                show_model_joint_window = false;
+                show_model_angle_window = false;
             }
             // 建立模型面板
             if(show_generate_model_window){
@@ -371,6 +402,13 @@ public:
                 }
             }
 
+            if(show_scene_window) {
+                ImGui::Separator();
+                ImGui::Text("space station editor");
+                ImGui::DragFloat3("space station pos", (float*)&space_station_pos, 0.01f, -10.0f, 10.0f);
+                ImGui::DragFloat3("space station rot", (float*)&space_station_rot, 1, -360.0f, 360.0f);
+                ImGui::DragFloat3("space station scale", (float*)&space_station_scale, 0.01, -10.0f, 10.0f);
+            }
             ImGui::End();            
         }
         ImGui::Render();
@@ -393,6 +431,11 @@ private:
 
     Mesh*    model_part_mesh[MAX_MODEL_PARTS];
     Texture* model_part_texture[MAX_MODEL_PARTS];
+
+    Mesh    space_station_mesh;
+    glm::vec3 space_station_pos;
+    glm::vec3 space_station_rot;
+    glm::vec3 space_station_scale;
 
 private:
     // 机器人关节个数，绑定的模型变量
@@ -426,6 +469,7 @@ bool MainScene::show_main_window;
 bool MainScene::show_generate_model_window;
 bool MainScene::show_model_joint_window;
 bool MainScene::show_model_angle_window;
+bool MainScene::show_scene_window;
 
 glm::vec4 MainScene::clearColor;
 
