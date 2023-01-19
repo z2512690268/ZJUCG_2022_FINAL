@@ -43,6 +43,46 @@ void Mesh::Clear()
     SAFE_DELETE(m_pAABB);
 }
 
+// export mesh to obj file
+bool Mesh::ExportMesh(const std::string& Filename) 
+{
+    std::ofstream file(Filename);
+    for (auto point : m_Positions) {
+        file << "v " << point.x << " " << point.y << " " << point.z << std::endl;
+    }
+    for (auto point : m_Normals) {
+        file << "vn " << point.x << " " << point.y << " " << point.z << std::endl;
+    }
+    for (auto point : m_TexCoords) {
+        file << "vt " << point.x << " " << point.y << std::endl;
+    }
+    for (int i = 0; i < m_Indices.size(); i += 3) {
+        file << "f " << m_Indices[i] + 1 << "/" << m_Indices[i] + 1 << "/" << m_Indices[i] + 1 << " "
+            << m_Indices[i + 1] + 1 << "/" << m_Indices[i + 1] + 1 << "/" << m_Indices[i + 1] + 1 << " "
+            << m_Indices[i + 2] + 1 << "/" << m_Indices[i + 2] + 1 << "/" << m_Indices[i + 2] + 1 << std::endl;
+    }
+}
+
+// merge mesh
+bool Mesh::MergeMesh(const Mesh& pMesh) {
+    // merge positions
+    int offset = m_Positions.size();
+    for (auto point : pMesh.m_Positions) {
+        m_Positions.push_back(point);
+    }
+    // merge normals
+    for (auto point : pMesh.m_Normals) {
+        m_Normals.push_back(point);
+    }
+    // merge texcoords
+    for (auto point : pMesh.m_TexCoords) {
+        m_TexCoords.push_back(point);
+    }
+    // merge indices
+    for (auto index : pMesh.m_Indices) {
+        m_Indices.push_back(index + offset);
+    }
+}
 
 bool Mesh::LoadMesh(const std::string& Filename)
 {

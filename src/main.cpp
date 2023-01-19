@@ -35,6 +35,13 @@ bool cameraMoveFlag = false;
 static const float FieldDepth = 50.0f;
 static const float FieldWidth = 25.0f;
 
+// 编辑器场景， 用于编辑与导出模型
+class EditorScene : public Scene
+{
+};
+
+
+// 主场景，布置场景并漫游
 class MainScene : public Scene
 {
 public:
@@ -122,208 +129,102 @@ public:
             model_joint_bind_part[i] = i + 1;
         }
 
-        space_station_pos = glm::vec3(0.0f, 0.0f, 0.0f);
-        space_station_rot = glm::vec3(0.0f, 0.0f, 0.0f);
-        space_station_scale = glm::vec3(1.0f, 1.0f, 1.0f);
+        // space_station_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+        // space_station_rot = glm::vec3(0.0f, 0.0f, 0.0f);
+        // space_station_scale = glm::vec3(1.0f, 1.0f, 1.0f);
         // init skybox
-        m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
+        // m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
 
         // if (!m_pSkyBox->Init("pic",
-        //         "stars_right.jpg",
-        //         "stars_left.jpg",
-        //         "stars_top.jpg",
-        //         "stars_bot.jpg",
-        //         "stars_front.jpg",
-        //         "stars_back.jpg")) {
-        //         // "sp3right.jpg",
-        //         // "sp3left.jpg",
-        //         // "sp3top.jpg",
-        //         // "sp3bot.jpg",
-        //         // "sp3front.jpg",
-        //         // "sp3back.jpg")) {
+        //         // "stars_right.jpg",
+        //         // "stars_left.jpg",
+        //         // "stars_top.jpg",
+        //         // "stars_bot.jpg",
+        //         // "stars_front.jpg",
+        //         // "stars_back.jpg")) {
+        //         "sp3right.jpg",
+        //         "sp3left.jpg",
+        //         "sp3top.jpg",
+        //         "sp3bot.jpg",
+        //         "sp3front.jpg",
+        //         "sp3back.jpg")) {
         //     printf("Failed to init skybox\n");
         //     return false;
         // }
 
-        space_station_mesh.LoadMesh("mesh/space_station.obj");
+        // space_station_mesh.LoadMesh("mesh/space_station.obj");
         return true;
     }
 
-    virtual bool Render()
-    {
-        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-        // printf("CHeck\n");
-        /// 渲染机械臂模型
-        // printf("Check8\n");
-        m_pBasicLight->Enable();
-        // Pipeline pbase;
-        // for(int i = 0; i < model_part_num; ++i) {
-        //     Pipeline p;
-        //     p.SetBaseMatrix(pbase.GetWorldTrans());
-        //     glm::vec3 trans = glm::vec3(0.0f);
-        //     glm::vec3 rots = glm::vec3(0.0f);
-        //     for(int j = 0; j < model_joint_num; ++j) {
-        //         if(model_joint_bind_part[j] == i){
-        //             if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_X) rots.x += model_joint_angle[j];
-        //             else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Y) rots.y += model_joint_angle[j];
-        //             else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Z) rots.z += model_joint_angle[j];
-        //             else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_X) trans.x += model_joint_angle[j];
-        //             else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Y) trans.y += model_joint_angle[j];
-        //             else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Z) trans.z += model_joint_angle[j]; 
-        //         }
-        //     }
-        //     p.Translate(model_part_pos[i]->x, model_part_pos[i]->y, model_part_pos[i]->z);
-        //     p.Rotate(model_part_rot[i]->x, model_part_rot[i]->y, model_part_rot[i]->z);
-        //     p.SetBaseMatrix(p.GetWorldTrans());
-        //     p.Translate(trans.x, trans.y, trans.z);
-        //     p.Rotate(rots.x, rots.y, rots.z);
-        //     p.Scale(model_part_scale[i]->x, model_part_scale[i]->y, model_part_scale[i]->z);
-        //     p.SetCamera(*m_pCamera);
-        //     p.SetPerspectiveProj(m_persParam);
-        //     model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
-        //     pbase.SetBaseMatrix(p.GetWorldTrans());
-        //     pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
-        // }
-
-        // 渲染空间站
-        Pipeline p;
-        p.SetCamera(*m_pCamera);
-        p.SetPerspectiveProj(m_persParam);
-        p.Translate(space_station_pos.x, space_station_pos.y, space_station_pos.z);
-        p.Rotate(space_station_rot.x, space_station_rot.y, space_station_rot.z);
-        p.Scale(space_station_scale.x, space_station_scale.y, space_station_scale.z);
-        space_station_mesh.Render(p.GetWVPTrans(), p.GetWorldTrans());
-        m_pBasicLight->Disable();
-        // m_pSkyBox->Render();
-
-        // 渲染文件管理器
-        m_fileDialog.Display();
-        if(m_fileDialog.HasSelected())
-        {
-            if(m_fileDialogType == 0) {
-                // 实现选中新模型文件
-                // m_fileDialogArgs[0] -> int 目标模型id
-                std::stringstream ss;
-                ss << m_fileDialogArgs[0];
-                int id;
-                ss >> id;
-                SAFE_DELETE(model_part_mesh[id]);
-                model_part_mesh[id] = new Mesh();
-                if(!model_part_mesh[id]->LoadMesh(m_fileDialog.GetSelected().string().c_str())){
-                    printf("Load mesh %s failed!\n", m_fileDialog.GetSelected().string().c_str());
-                    return false;
-                }
-                printf("load mesh %s success\n", m_fileDialog.GetSelected().string().c_str());
-            } else if(m_fileDialogType == 1) {
-                // 实现选中新模型纹理
-                // m_fileDialogArgs[0] -> int 目标模型id
-                std::stringstream ss;
-                ss << m_fileDialogArgs[0];
-                int id;
-                ss >> id;
-                SAFE_DELETE(model_part_texture[id]);
-                model_part_texture[id] = new Texture(GL_TEXTURE_2D, m_fileDialog.GetSelected().string().c_str());
-                if (!model_part_texture[id]->Load()) {
-                    printf("Load mesh %s failed!\n", m_fileDialog.GetSelected().string().c_str());
-                    return false;
-                }
-                printf("load mesh %s success\n", m_fileDialog.GetSelected().string().c_str());
-            }
-            m_fileDialog.ClearSelected();
-        }
-
-        // printf("Check9\n");
+    bool ImGuiPanel() {
         // 控制面板
         {
+            ImGui::ShowDemoWindow();
             //窗口控制
-            ImGui::Begin("main control", &show_main_window, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+            ImGui::Begin("main control", &show_main_window, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
             ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Always);
             ImGui::SetWindowSize(ImVec2(300, WINDOW_HEIGHT), ImGuiCond_Always);
             
-            // 背景色
-            ImGui::ColorEdit3("clear color", (float*)&clearColor);
-            ImGui::ColorEdit3("light color", (float*)&m_directionalLight.Color);
-            ImGui::DragFloat("Ambient", &m_directionalLight.AmbientIntensity, 0.01f, 0.0f, 1.0f);
-            ImGui::DragFloat("Diffuse", &m_directionalLight.DiffuseIntensity, 0.01f, 0.0f, 1.0f);
-            ImGui::DragFloat3("direction", (float*)&m_directionalLight.Direction, 0.01f, -10.0f, 10.0f);
-
+            // // 背景色
+            if (ImGui::CollapsingHeader("light control")){
+                ImGui::ColorEdit3("clear color", (float*)&clearColor);
+                ImGui::ColorEdit3("light color", (float*)&m_directionalLight.Color);
+                ImGui::DragFloat("Ambient", &m_directionalLight.AmbientIntensity, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Diffuse", &m_directionalLight.DiffuseIntensity, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat3("direction", (float*)&m_directionalLight.Direction, 0.01f, -10.0f, 10.0f);
+            }
             // 相机控制
-            ImGui::Checkbox("camera move", &cameraMoveFlag);
-            if(ImGui::Button("Reset Camera")) {
-                // reset modelCamera
-                SAFE_DELETE(m_pCamera);
-                if(m_camera_mode == MODEL_CAMERA) {
-                    m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+            if (ImGui::CollapsingHeader("camera control")){
+                ImGui::Checkbox("camera move", &cameraMoveFlag);
+                if(ImGui::Button("Reset Camera")) {
+                    // reset modelCamera
+                    SAFE_DELETE(m_pCamera);
+                    if(m_camera_mode == MODEL_CAMERA) {
+                        m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+                    }
+                    if(m_camera_mode == MOVE_CAMERA) {
+                        m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+                    }
+                    m_pCamera->SetICallBack(this);
+                    m_pCamera->Init();
+                    return true;
                 }
-                if(m_camera_mode == MOVE_CAMERA) {
-                    m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+                ImGui::SameLine();
+                if(ImGui::Button("Change Camera Type")) {
+                    glm::vec3 pos = m_pCamera->GetPos();
+                    glm::vec3 target = m_pCamera->GetTarget();
+                    glm::vec3 up = m_pCamera->GetUp();
+                    SAFE_DELETE(m_pCamera);
+                    if(m_camera_mode == MODEL_CAMERA) {
+                        m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+                        m_camera_mode = MOVE_CAMERA;
+                    } else {
+                        m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
+                        m_camera_mode = MODEL_CAMERA;
+                    }
+                    m_pCamera->SetICallBack(this);
+                    m_pCamera->SetPos(pos);
+                    m_pCamera->SetTarget(target);
+                    m_pCamera->SetUp(up);
+                    SetMouse(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+                    return true;
                 }
-                m_pCamera->SetICallBack(this);
-                m_pCamera->Init();
-                return true;
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Change Camera Type")) {
-                glm::vec3 pos = m_pCamera->GetPos();
-                glm::vec3 target = m_pCamera->GetTarget();
-                glm::vec3 up = m_pCamera->GetUp();
-                SAFE_DELETE(m_pCamera);
-                if(m_camera_mode == MODEL_CAMERA) {
-                    m_pCamera = new MoveCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
-                    m_camera_mode = MOVE_CAMERA;
-                } else {
-                    m_pCamera = new ModelCamera(WINDOW_WIDTH, WINDOW_HEIGHT);
-                    m_camera_mode = MODEL_CAMERA;
-                }
-                m_pCamera->SetICallBack(this);
-                m_pCamera->SetPos(pos);
-                m_pCamera->SetTarget(target);
-                m_pCamera->SetUp(up);
-                SetMouse(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-                return true;
-            }
-            ImGui::Text("Camera Mode: %s", m_camera_mode == MODEL_CAMERA ? "Model Camera" : "Move Camera");
-            ImGui::DragFloat3("Camera Pos", (float*)&m_pCamera->GetPos(), 0.1f, -50.0f, 50.0f);
-            ImGui::DragFloat3("Camera Target", (float*)&m_pCamera->GetTarget(), 0.1f, -50.0f, 50.0f);
-            if (m_camera_mode == MODEL_CAMERA){
-                if(cameraMoveFlag){
-                    SetKeyState(CALLBACK_KEY_ESCAPE, CALLBACK_KEY_STATE_PRESS);
-                } else {
-                    SetKeyState(CALLBACK_KEY_ESCAPE, CALLBACK_KEY_STATE_RELEASE);
+                ImGui::Text("Camera Mode: %s", m_camera_mode == MODEL_CAMERA ? "Model Camera" : "Move Camera");
+                ImGui::DragFloat3("Camera Pos", (float*)&m_pCamera->GetPos(), 0.1f, -50.0f, 50.0f);
+                ImGui::DragFloat3("Camera Target", (float*)&m_pCamera->GetTarget(), 0.1f, -50.0f, 50.0f);
+                if (m_camera_mode == MODEL_CAMERA){
+                    if(cameraMoveFlag){
+                        SetKeyState(CALLBACK_KEY_ESCAPE, CALLBACK_KEY_STATE_PRESS);
+                    } else {
+                        SetKeyState(CALLBACK_KEY_ESCAPE, CALLBACK_KEY_STATE_RELEASE);
+                    }
                 }
             }
-            if(ImGui::Button("edit model"))
-            {
-                show_generate_model_window = true;
-                show_model_joint_window = false;
-                show_model_angle_window = false;
-                show_scene_window = false;
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("edit joint"))
-            {
-                show_model_joint_window = true;
-                show_generate_model_window = false;
-                show_model_angle_window = false;
-                show_scene_window = false;
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("angle ctrl"))
-            {
-                show_model_angle_window = true;
-                show_generate_model_window = false;
-                show_model_joint_window = false;
-                show_scene_window = false;
-            }
-            if(ImGui::Button("scene"))
-            {
-                show_scene_window = true;
-                show_generate_model_window = false;
-                show_model_joint_window = false;
-                show_model_angle_window = false;
+            if( ImGui::Button("test")) {
+
             }
             // 建立模型面板
-            if(show_generate_model_window){
+            if (ImGui::CollapsingHeader("model editor")){
                 ImGui::Separator();
                 ImGui::Text("model editor");
                 if (ImGui::Button("add new part") && model_part_num < MAX_MODEL_PARTS) {
@@ -365,7 +266,7 @@ public:
                 }
             }
 
-            if(show_model_joint_window) {
+            if (ImGui::CollapsingHeader("joint editor")) {
                 ImGui::Separator();
                 ImGui::Text("joint editor");
                 if (ImGui::Button("add new joint") && model_joint_num < MAX_MODEL_PARTS) {
@@ -383,15 +284,15 @@ public:
                     ImGui::Combo(("bind part" + std::to_string(i)).c_str(), &model_joint_bind_part[i], items, model_part_num);
                     // type
                     ImGui::RadioButton(("rotate x " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_X); ImGui::SameLine();
+                    ImGui::RadioButton(("translate x " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_X); 
                     ImGui::RadioButton(("rotate y " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Y); ImGui::SameLine();
-                    ImGui::RadioButton(("rotate z " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Z);
-                    ImGui::RadioButton(("translate x " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_X); ImGui::SameLine();
-                    ImGui::RadioButton(("translate y " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_Y); ImGui::SameLine();
+                    ImGui::RadioButton(("translate y " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_Y); 
+                    ImGui::RadioButton(("rotate z " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Z); ImGui::SameLine();
                     ImGui::RadioButton(("translate z " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_Z);
                 }
             }
 
-            if(show_model_angle_window) {
+            if (ImGui::CollapsingHeader("angle control")) {
                 ImGui::Separator();
                 ImGui::Text("angle editor");
                 for(int i = 0; i < model_joint_num; i++)
@@ -402,15 +303,106 @@ public:
                 }
             }
 
-            if(show_scene_window) {
+            if (ImGui::CollapsingHeader("Scene editor")) {
                 ImGui::Separator();
                 ImGui::Text("space station editor");
                 ImGui::DragFloat3("space station pos", (float*)&space_station_pos, 0.01f, -10.0f, 10.0f);
                 ImGui::DragFloat3("space station rot", (float*)&space_station_rot, 1, -360.0f, 360.0f);
                 ImGui::DragFloat3("space station scale", (float*)&space_station_scale, 0.01, -10.0f, 10.0f);
             }
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();            
         }
+        return true;
+    }
+
+    virtual bool Render()
+    {
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+        // printf("CHeck\n");
+        /// 渲染机械臂模型
+        // printf("Check8\n");
+        m_pBasicLight->Enable();
+        Pipeline pbase;
+        for(int i = 0; i < model_part_num; ++i) {
+            Pipeline p;
+            p.SetBaseMatrix(pbase.GetWorldTrans());
+            glm::vec3 trans = glm::vec3(0.0f);
+            glm::vec3 rots = glm::vec3(0.0f);
+            for(int j = 0; j < model_joint_num; ++j) {
+                if(model_joint_bind_part[j] == i){
+                    if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_X) rots.x += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Y) rots.y += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Z) rots.z += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_X) trans.x += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Y) trans.y += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Z) trans.z += model_joint_angle[j]; 
+                }
+            }
+            p.Translate(model_part_pos[i]->x, model_part_pos[i]->y, model_part_pos[i]->z);
+            p.Rotate(model_part_rot[i]->x, model_part_rot[i]->y, model_part_rot[i]->z);
+            p.SetBaseMatrix(p.GetWorldTrans());
+            p.Translate(trans.x, trans.y, trans.z);
+            p.Rotate(rots.x, rots.y, rots.z);
+            p.Scale(model_part_scale[i]->x, model_part_scale[i]->y, model_part_scale[i]->z);
+            p.SetCamera(*m_pCamera);
+            p.SetPerspectiveProj(m_persParam);
+            model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
+            pbase.SetBaseMatrix(p.GetWorldTrans());
+            pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
+        }
+
+        // 渲染空间站
+        // Pipeline p;
+        // p.SetCamera(*m_pCamera);
+        // p.SetPerspectiveProj(m_persParam);
+        // p.Translate(space_station_pos.x, space_station_pos.y, space_station_pos.z);
+        // p.Rotate(space_station_rot.x, space_station_rot.y, space_station_rot.z);
+        // p.Scale(space_station_scale.x, space_station_scale.y, space_station_scale.z);
+        // space_station_mesh.Render(p.GetWVPTrans(), p.GetWorldTrans());
+        m_pBasicLight->Disable();
+        // m_pSkyBox->Render();
+
+        // 渲染文件管理器
+        m_fileDialog.Display();
+        if(m_fileDialog.HasSelected())
+        {
+            if(m_fileDialogType == 0) {
+                // 实现选中新模型文件
+                // m_fileDialogArgs[0] -> int 目标模型id
+                std::stringstream ss;
+                ss << m_fileDialogArgs[0];
+                int id;
+                ss >> id;
+                SAFE_DELETE(model_part_mesh[id]);
+                model_part_mesh[id] = new Mesh();
+                if(!model_part_mesh[id]->LoadMesh(m_fileDialog.GetSelected().string().c_str())){
+                    printf("Load mesh %s failed!\n", m_fileDialog.GetSelected().string().c_str());
+                    return false;
+                }
+                printf("load mesh %s success\n", m_fileDialog.GetSelected().string().c_str());
+            } else if(m_fileDialogType == 1) {
+                // 实现选中新模型纹理
+                // m_fileDialogArgs[0] -> int 目标模型id
+                std::stringstream ss;
+                ss << m_fileDialogArgs[0];
+                int id;
+                ss >> id;
+                SAFE_DELETE(model_part_texture[id]);
+                model_part_texture[id] = new Texture(GL_TEXTURE_2D, m_fileDialog.GetSelected().string().c_str());
+                if (!model_part_texture[id]->Load()) {
+                    printf("Load mesh %s failed!\n", m_fileDialog.GetSelected().string().c_str());
+                    return false;
+                }
+                printf("load mesh %s success\n", m_fileDialog.GetSelected().string().c_str());
+            }
+            m_fileDialog.ClearSelected();
+        }
+
+        // printf("Check9\n");
+        int ret = ImGuiPanel();
+        if (!ret) return false;
         ImGui::Render();
         // // Draw
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());

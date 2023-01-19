@@ -72,9 +72,16 @@ public:
                         const std::vector<unsigned int>& Indices,
                         const std::string& MaterialName);
 	
-	// bool ExportMesh(const std::string& Filename);
+	bool ExportMesh(const std::string& Filename);
 
+    bool MergeMesh(const Mesh& pMesh);
+    
 	const AABB& GetAABB() const { return *m_pAABB; }
+
+    const std::vector<glm::vec3>& GetPositions() const { return m_Positions; }
+    const std::vector<glm::vec3>& GetNormals() const { return m_Normals; }
+    const std::vector<glm::vec2>& GetTexCoords() const { return m_TexCoords; }
+    const std::vector<unsigned int>& GetIndices() const { return m_Indices; }
 
 protected:
     bool InitFromScene(const aiScene* pScene, const std::string& Filename);
