@@ -111,6 +111,19 @@ protected:
 	AABB* m_pAABB;
 };
 
+// class JointMesh : public Mesh
+// {
+// public:
+//     JointMesh();
+//     ~JointMesh();
+
+//     void Render(const glm::mat4x4& WVPMatrix, const glm::mat4x4& WorldMatrix);
+// private:
+//     int model_part_num;
+//     glm::vec3* model_part_pos[MAX_MODEL_PARTS];
+//     glm::vec3* model_part_rot[MAX_MODEL_PARTS];
+//     glm::vec3* model_part_scale[MAX_MODEL_PARTS];
+// };
 
 class RectangleMesh 
 {
