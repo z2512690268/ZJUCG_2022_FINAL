@@ -5,6 +5,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
@@ -84,7 +85,6 @@ public:
     const std::vector<unsigned int>& GetIndices() const { return m_Indices; }
 
 protected:
-    bool InitFromScene(const aiScene* pScene, const std::string& Filename);
     void InitMesh(const aiMesh* paiMesh,
                     std::vector<glm::vec3>& Positions,
                     std::vector<glm::vec3>& Normals,
@@ -101,6 +101,7 @@ protected:
     GLuint m_Buffers[6];
     std::vector<MeshEntry*> m_Entries;
     std::vector<Texture*> m_Textures;
+    std::vector<std::string> m_MaterialNames;
 
     std::vector<glm::vec3> m_Positions;
     std::vector<glm::vec3> m_Normals;

@@ -46,41 +46,81 @@ void Mesh::Clear()
 // export mesh to obj file
 bool Mesh::ExportMesh(const std::string& Filename) 
 {
-    std::ofstream file(Filename);
-    for (auto point : m_Positions) {
-        file << "v " << point.x << " " << point.y << " " << point.z << std::endl;
+    std::string path = Filename.substr(0, Filename.find_last_of("/"));
+    aiScene* pScene = new aiScene();
+
+    pScene->mNumMeshes = m_Entries.size();
+    pScene->mMeshes = new aiMesh*[pScene->mNumMeshes];
+    for (int i = 0; i < pScene->mNumMeshes; ++i) {
+        pScene->mMeshes[i] = new aiMesh();
+        pScene->mMeshes[i]->mNumVertices = m_Positions.size();
+        pScene->mMeshes[i]->mVertices = new aiVector3D[pScene->mMeshes[i]->mNumVertices];
+        pScene->mMeshes[i]->mNormals = new aiVector3D[pScene->mMeshes[i]->mNumVertices];
+        pScene->mMeshes[i]->mTextureCoords[0] = new aiVector3D[pScene->mMeshes[i]->mNumVertices];
+        pScene->mMeshes[i]->mNumUVComponents[0] = 2;
+        pScene->mMeshes[i]->mNumFaces = m_Entries[i]->NumIndices / 3;
+        pScene->mMeshes[i]->mFaces = new aiFace[pScene->mMeshes[i]->mNumFaces];
+        for (int j = 0; j < pScene->mMeshes[i]->mNumFaces; ++j) {
+            pScene->mMeshes[i]->mFaces[j].mNumIndices = 3;
+            pScene->mMeshes[i]->mFaces[j].mIndices = new unsigned int[3];
+            pScene->mMeshes[i]->mFaces[j].mIndices[0] = j * 3;
+            pScene->mMeshes[i]->mFaces[j].mIndices[1] = j * 3 + 1;
+            pScene->mMeshes[i]->mFaces[j].mIndices[2] = j * 3 + 2;
+        }
+        for (int j = 0; j < pScene->mMeshes[i]->mNumVertices; ++j) {
+            pScene->mMeshes[i]->mVertices[j].x = m_Positions[m_Indices[m_Entries[i]->BaseIndex + j]].x;
+            pScene->mMeshes[i]->mVertices[j].y = m_Positions[m_Indices[m_Entries[i]->BaseIndex + j]].y;
+            pScene->mMeshes[i]->mVertices[j].z = m_Positions[m_Indices[m_Entries[i]->BaseIndex + j]].z;
+            pScene->mMeshes[i]->mNormals[j].x = m_Normals[m_Indices[m_Entries[i]->BaseIndex + j]].x;
+            pScene->mMeshes[i]->mNormals[j].y = m_Normals[m_Indices[m_Entries[i]->BaseIndex + j]].y;
+            pScene->mMeshes[i]->mNormals[j].z = m_Normals[m_Indices[m_Entries[i]->BaseIndex + j]].z;
+            pScene->mMeshes[i]->mTextureCoords[0][j].x = m_TexCoords[m_Indices[m_Entries[i]->BaseIndex + j]].x;
+            pScene->mMeshes[i]->mTextureCoords[0][j].y = m_TexCoords[m_Indices[m_Entries[i]->BaseIndex + j]].y;
+        }
     }
-    for (auto point : m_Normals) {
-        file << "vn " << point.x << " " << point.y << " " << point.z << std::endl;
+    pScene->mNumMaterials = m_MaterialNames.size();
+    pScene->mMaterials = new aiMaterial*[pScene->mNumMaterials];
+    for (int i = 0; i < pScene->mNumMaterials; ++i) {
+        pScene->mMaterials[i] = new aiMaterial();
+        aiString name(m_MaterialNames[i].c_str());
+        pScene->mMaterials[i]->AddProperty(&name, AI_MATKEY_NAME);
+        aiString texPath(m_MaterialNames[i].c_str());
+        pScene->mMaterials[i]->AddProperty(&texPath, AI_MATKEY_TEXTURE_DIFFUSE(0));
     }
-    for (auto point : m_TexCoords) {
-        file << "vt " << point.x << " " << point.y << std::endl;
+
+    for (int i = 0; i < pScene->mNumMeshes; ++i) {
+        pScene->mMeshes[i]->mMaterialIndex = m_Entries[i]->MaterialIndex;
     }
-    for (int i = 0; i < m_Indices.size(); i += 3) {
-        file << "f " << m_Indices[i] + 1 << "/" << m_Indices[i] + 1 << "/" << m_Indices[i] + 1 << " "
-            << m_Indices[i + 1] + 1 << "/" << m_Indices[i + 1] + 1 << "/" << m_Indices[i + 1] + 1 << " "
-            << m_Indices[i + 2] + 1 << "/" << m_Indices[i + 2] + 1 << "/" << m_Indices[i + 2] + 1 << std::endl;
-    }
+    // Assimp::Exporter exporter;
+    // exporter.Export(pScene, "obj", Filename);
 }
 
 // merge mesh
 bool Mesh::MergeMesh(const Mesh& pMesh) {
-    // merge positions
-    int offset = m_Positions.size();
-    for (auto point : pMesh.m_Positions) {
-        m_Positions.push_back(point);
+    int baseVertexIndex = m_Positions.size();
+    int baseIndiceIndex = m_Indices.size();
+    int materialIndex = m_MaterialNames.size();
+    for (int i = 0; i < pMesh.m_Positions.size(); ++i) {
+        m_Positions.push_back(pMesh.m_Positions[i]);
     }
-    // merge normals
-    for (auto point : pMesh.m_Normals) {
-        m_Normals.push_back(point);
+    for (int i = 0; i < pMesh.m_Normals.size(); ++i) {
+        m_Normals.push_back(pMesh.m_Normals[i]);
     }
-    // merge texcoords
-    for (auto point : pMesh.m_TexCoords) {
-        m_TexCoords.push_back(point);
+    for (int i = 0; i < pMesh.m_Indices.size(); ++i) {
+        m_Indices.push_back(pMesh.m_Indices[i] + baseVertexIndex);
+    } 
+    for (int i = 0; i < pMesh.m_MaterialNames.size(); ++i) {
+        m_MaterialNames.push_back(pMesh.m_MaterialNames[i]);
+        Texture* pTexture = new Texture(GL_TEXTURE_2D, pMesh.m_MaterialNames[i]);
+        pTexture->Load();
+        m_Textures.push_back(pTexture);
     }
-    // merge indices
-    for (auto index : pMesh.m_Indices) {
-        m_Indices.push_back(index + offset);
+    for (int i = 0; i < pMesh.m_Entries.size(); ++i) {
+        MeshEntry entry;
+        entry.BaseVertex = pMesh.m_Entries[i]->BaseVertex + baseVertexIndex; 
+        entry.BaseIndex = pMesh.m_Entries[i]->BaseIndex + baseIndiceIndex;
+        entry.NumIndices = pMesh.m_Entries[i]->NumIndices;
+        entry.MaterialIndex = pMesh.m_Entries[i]->MaterialIndex + materialIndex;
     }
 }
 
@@ -98,10 +138,52 @@ bool Mesh::LoadMesh(const std::string& Filename)
 
     bool Ret = false;
     Assimp::Importer Importer;
-
+    Assimp::Exporter Exporter;
     const aiScene* pScene = Importer.ReadFile(Filename.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals |  aiProcess_JoinIdenticalVertices);
     if (pScene) {
-        Ret = InitFromScene(pScene, Filename);
+        m_Entries.resize(pScene->mNumMeshes);
+        m_Textures.resize(pScene->mNumMaterials);
+
+        unsigned int NumVertices = 0;
+        unsigned int NumIndices = 0;
+
+        // Initialize the meshes in the scene one by one
+        for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
+            m_Entries[i] = new MeshEntry();
+            m_Entries[i]->MaterialIndex = pScene->mMeshes[i]->mMaterialIndex;        
+            m_Entries[i]->NumIndices = pScene->mMeshes[i]->mNumFaces * 3;
+            m_Entries[i]->BaseVertex = NumVertices;
+            m_Entries[i]->BaseIndex = NumIndices;
+            
+            NumVertices += pScene->mMeshes[i]->mNumVertices;
+            NumIndices  += m_Entries[i]->NumIndices;
+        }
+
+        m_Positions.clear();
+        m_Normals.clear();
+        m_TexCoords.clear();
+        m_Indices.clear();
+
+        // Reserve space in the vectors for the vertex attributes and indices
+        m_Positions.reserve(NumVertices);
+        m_Normals.reserve(NumVertices);
+        m_TexCoords.reserve(NumVertices);
+        m_Indices.reserve(NumIndices);
+
+        // Initialize the meshes in the scene one by one
+        for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
+            const aiMesh* paiMesh = pScene->mMeshes[i];
+            InitMesh(paiMesh, m_Positions, m_Normals, m_TexCoords, m_Indices);
+        }
+        if (!InitMaterials(pScene, Filename)) {
+            printf("Error loading materials\n");
+            return false;
+        }
+
+        SAFE_DELETE(m_pAABB);
+        m_pAABB = new AABB(m_Positions);
+
+        Ret = InitBuffers(m_Positions, m_Normals, m_TexCoords, m_Indices);
     }
     else {
         printf("Error parsing '%s': '%s'\n", Filename.c_str(), Importer.GetErrorString());
@@ -154,52 +236,6 @@ bool Mesh::InitBuffers(const std::vector<glm::vec3>& Positions,
     return glGetError() == 0;
 }
 
-bool Mesh::InitFromScene(const aiScene* pScene, const std::string& Filename)
-{
-    m_Entries.resize(pScene->mNumMeshes);
-    m_Textures.resize(pScene->mNumMaterials);
-
-    unsigned int NumVertices = 0;
-    unsigned int NumIndices = 0;
-
-    // Initialize the meshes in the scene one by one
-    for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-        m_Entries[i] = new MeshEntry();
-        m_Entries[i]->MaterialIndex = pScene->mMeshes[i]->mMaterialIndex;        
-        m_Entries[i]->NumIndices = pScene->mMeshes[i]->mNumFaces * 3;
-        m_Entries[i]->BaseVertex = NumVertices;
-        m_Entries[i]->BaseIndex = NumIndices;
-        
-        NumVertices += pScene->mMeshes[i]->mNumVertices;
-        NumIndices  += m_Entries[i]->NumIndices;
-    }
-
-    m_Positions.clear();
-    m_Normals.clear();
-    m_TexCoords.clear();
-    m_Indices.clear();
-
-    // Reserve space in the vectors for the vertex attributes and indices
-    m_Positions.reserve(NumVertices);
-    m_Normals.reserve(NumVertices);
-    m_TexCoords.reserve(NumVertices);
-    m_Indices.reserve(NumIndices);
-
-    // Initialize the meshes in the scene one by one
-    for (unsigned int i = 0 ; i < m_Entries.size() ; i++) {
-        const aiMesh* paiMesh = pScene->mMeshes[i];
-        InitMesh(paiMesh, m_Positions, m_Normals, m_TexCoords, m_Indices);
-    }
-    if (!InitMaterials(pScene, Filename)) {
-        printf("Error loading materials\n");
-        return false;
-    }
-
-    SAFE_DELETE(m_pAABB);
-    m_pAABB = new AABB(m_Positions);
-
-    return InitBuffers(m_Positions, m_Normals, m_TexCoords, m_Indices);
-}
 
 void Mesh::InitMesh(const aiMesh* paiMesh,
                     std::vector<glm::vec3>& Positions,
@@ -325,16 +361,18 @@ int Mesh::InitVertexMesh(const std::vector<Vertex>& Vertices,
                     const std::string& MaterialName)
 {
     // init texture
-    Texture* pTexture = new Texture(GL_TEXTURE_2D, MaterialName.c_str());
     int tex_id;
+    Texture* pTexture = new Texture(GL_TEXTURE_2D, MaterialName.c_str());
 
     if (pTexture->Load()) {
         m_Textures.push_back(pTexture);
+        m_MaterialNames.push_back(MaterialName);
         tex_id = m_Textures.size() - 1;
     }
     else {
         delete pTexture;
         pTexture = new Texture(GL_TEXTURE_2D, "pic/white.png");
+        m_MaterialNames.push_back("pic/white.png");
         pTexture->Load();
         m_Textures.push_back(pTexture);
         tex_id = m_Textures.size() - 1;

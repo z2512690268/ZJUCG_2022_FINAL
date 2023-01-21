@@ -35,109 +35,150 @@ bool cameraMoveFlag = false;
 static const float FieldDepth = 50.0f;
 static const float FieldWidth = 25.0f;
 
-// 主场景，布置场景并漫游
-class MainScene : public Scene
-{
-};
+#define ENTRY_SCENE 1
+#define MODEL_EDITOR 2
+#define JOINT_EDITOR 3
+#define SCENE_EDITOR 4
+#define SCENE_ROAM 5
 
+glm::vec4 clearColor;
 
-// 编辑器场景， 用于编辑与导出模型
-class EditorScene : public Scene
+class EntryScene : public Scene
 {
 public:
-    EditorScene() : Scene(MODEL_CAMERA) {
+    EntryScene() : Scene(MODEL_CAMERA) {
+    } 
+    ~EntryScene() {
     }
-    ~EditorScene() {
-        // SAFE_DELETE(m_pSkyBox);
+    virtual bool Init() {
+        clearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
+        return true;
+    }
+    virtual bool Render() {
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+
+        {
+            ImGui::Begin("Entry Window", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+            ImGui::SetWindowPos(ImVec2(500, 250), ImGuiCond_Always);
+            ImGui::SetWindowSize(ImVec2(415, 400), ImGuiCond_Always);
+            if(ImGui::CollapsingHeader("Help")) {
+                ImGui::Text("This is a simple 3D model editor.");
+                ImGui::Text("You can edit the model, joint and scene.");
+                ImGui::Text("You can also roam the scene.");
+                ImGui::Text("Any time, you can press 'q' to quit.");
+                ImGui::Text("Enjoy it!");
+            }
+
+            if(ImGui::Button("Model Editor", ImVec2(400, 50)))
+            {
+                m_ret = MODEL_EDITOR;
+                glutLeaveMainLoop();
+            }
+            if(ImGui::Button("Joint Editor", ImVec2(400, 50)))
+            {
+                m_ret = JOINT_EDITOR;
+                glutLeaveMainLoop();
+            }
+            if(ImGui::Button("Scene Editor", ImVec2(400, 50)))
+            {
+                m_ret = SCENE_EDITOR;
+                glutLeaveMainLoop();
+            }
+            if(ImGui::Button("Scene Roaming", ImVec2(400, 50)))
+            {
+                m_ret = SCENE_ROAM;
+                glutLeaveMainLoop();
+            }
+
+            ImGui::End();
+        }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        return true;
+    }
+};
+
+// 编辑器场景， 用于编辑与导出模型
+class ModelEditor : public Scene
+{
+public:
+    ModelEditor() : Scene(MODEL_CAMERA) {
+    }
+    ~ModelEditor() {
+        SAFE_DELETE(m_pSkyBox);
     }
     virtual bool Init()
     {
         clearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
         show_main_window = 1;
-        m_pfileDialog = new ImGui::FileBrowser();
-        m_pfileDialog->SetTitle("Select a file");
+        m_fileDialog.SetTitle("Select a file");
 
         m_directionalLight.DiffuseIntensity = 0.5f;
 
         model_part_num = 8;
         model_part_mesh[0] = new Mesh();
         model_part_mesh[0]->LoadMesh("mesh/base2.stl");
-        model_part_mesh_name[0] = "mesh/base2.stl";
         model_part_pos[0] = new glm::vec3(0.0f, 0.0f, 0.0f);
         model_part_rot[0] = new glm::vec3(0.0f, 0.0f, 0.0f);
         model_part_scale[0] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[0] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[0] = "pic/test.png";
         model_part_texture[0]->Load();
 
         model_part_mesh[1] = new Mesh();
         model_part_mesh[1]->LoadMesh("mesh/short2.stl");
-        model_part_mesh_name[1] = "mesh/short2.stl";
         model_part_pos[1] = new glm::vec3(0.0f, 0.75f, 0.0f);
         model_part_rot[1] = new glm::vec3(0.0f, 0.0f, 0.0f);
         model_part_scale[1] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[1] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[1] = "pic/test.png";
         model_part_texture[1]->Load();
 
         model_part_mesh[2] = new Mesh();
         model_part_mesh[2]->LoadMesh("mesh/short2.stl");
-        model_part_mesh_name[2] = "mesh/short2.stl";
         model_part_pos[2] = new glm::vec3(0.0f, 0.5f, 0.5f);
         model_part_rot[2] = new glm::vec3(-90.0f, -90.0f, 0.0f);
         model_part_scale[2] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[2] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[2] = "pic/test.png";
         model_part_texture[2]->Load();
 
         model_part_mesh[3] = new Mesh();
         model_part_mesh[3]->LoadMesh("mesh/long.stl");
-        model_part_mesh_name[3] = "mesh/long.stl";
         model_part_pos[3] = new glm::vec3(0.0f, 0.5f, 0.5f);
         model_part_rot[3] = new glm::vec3(0.0f, -90.0f, -90.0f);
         model_part_scale[3] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[3] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[3] = "pic/test.png";
         model_part_texture[3]->Load();
 
         model_part_mesh[4] = new Mesh();
         model_part_mesh[4]->LoadMesh("mesh/long.stl");
-        model_part_mesh_name[4] = "mesh/long.stl";
         model_part_pos[4] = new glm::vec3(0.0f, 1.0f, 5.0f);
         model_part_rot[4] = new glm::vec3(0.0f, 180.0f, 0.0f);
         model_part_scale[4] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[4] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[4] = "pic/test.png";
         model_part_texture[4]->Load();
 
         model_part_mesh[5] = new Mesh();
         model_part_mesh[5]->LoadMesh("mesh/short2.stl");
-        model_part_mesh_name[5] = "mesh/short2.stl";
         model_part_pos[5] = new glm::vec3(0.0f, 1.0f, 5.0f);
         model_part_rot[5] = new glm::vec3(0.0f, -90.0f, 0.0f);
         model_part_scale[5] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[5] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[5] = "pic/test.png";
         model_part_texture[5]->Load();
 
         model_part_mesh[6] = new Mesh();
         model_part_mesh[6]->LoadMesh("mesh/short2.stl");
-        model_part_mesh_name[6] = "mesh/short2.stl";
         model_part_pos[6] = new glm::vec3(0.0f, 0.5f, 0.5f);
         model_part_rot[6] = new glm::vec3(-90.0f, 90.0f, 0.0f);
         model_part_scale[6] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[6] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[6] = "pic/test.png";
         model_part_texture[6]->Load();
 
         model_part_mesh[7] = new Mesh();
         model_part_mesh[7]->LoadMesh("mesh/base2.stl");
-        model_part_mesh_name[7] = "mesh/base2.stl";
         model_part_pos[7] = new glm::vec3(0.0f, 0.5f, 1.25f);
         model_part_rot[7] = new glm::vec3(90.0f, 0.0f, 0.0f);
         model_part_scale[7] = new glm::vec3(0.01f, 0.01f, 0.01f);
         model_part_texture[7] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-        model_part_texture_name[7] = "pic/test.png";
         model_part_texture[7]->Load();
 
         model_joint_num = 7;
@@ -145,52 +186,7 @@ public:
             model_joint_bind_type[i] = JOINT_TYPE_ROTATE_Y;
             model_joint_bind_part[i] = i + 1;
         }
-
-        // space_station_pos = glm::vec3(0.0f, 0.0f, 0.0f);
-        // space_station_rot = glm::vec3(0.0f, 0.0f, 0.0f);
-        // space_station_scale = glm::vec3(1.0f, 1.0f, 1.0f);
-        // init skybox
-        // m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
-
-        // if (!m_pSkyBox->Init("pic"
-        //         // "stars_right.jpg",
-        //         // "stars_left.jpg",
-         // "stars_top.jpg",
-        //         // "stars_bot.jpg",
-        // w "stars_front.jpg",
-        //         // "stars_back.jpg")) {
-        //         "sp3right.jpg",
-        //         "sp3left.jpg",
-        //         "sp3top.jpg",
-        //         "sp3bot.jpg",
-        //         "sp3front.jpg",
-        //         "sp3back.jpg")) {
-        //     printf("Failed to init skybox\n");
-        //     return false;
-        // }
-
-        // space_station_mesh.LoadMesh("mesh/space_station.obj");
         return true;
-    }
-
-    void SaveModel() {
-        // save model
-        std::ofstream fout("model.txt");
-        fout << model_joint_num << std::endl;
-        for(int i = 0; i < model_joint_num; ++i) {
-            fout << model_joint_bind_type[i] << " " << model_joint_bind_part[i] << std::endl;
-        }
-
-    }
-
-    void LoadModel() {
-        // load model
-        std::ifstream fin("model.txt");
-        fin >> model_joint_num;
-        for(int i = 0; i < model_joint_num; ++i) {
-            fin >> model_joint_bind_type[i] >> model_joint_bind_part[i];
-        }
-        fin.close();
     }
 
     bool ImGuiPanel() {
@@ -270,9 +266,7 @@ public:
                     model_part_scale[model_part_num] = new glm::vec3(0.01f);
                     model_part_mesh[model_part_num] = new Mesh();
                     model_part_mesh[model_part_num]->LoadMesh("mesh/cube.obj");
-                    model_part_mesh_name[model_part_num] = "mesh/cube.obj";
                     model_part_texture[model_part_num] = new Texture(GL_TEXTURE_2D, "pic/test.png");
-                    model_part_texture_name[model_part_num] = "pic/test.png";
                     model_part_texture[model_part_num]->Load();
                     model_part_num++;
                     printf("Check1 %d\n", model_part_num);
@@ -291,16 +285,16 @@ public:
                         m_fileDialogType = 0;
                         m_fileDialogArgs.clear();
                         m_fileDialogArgs.emplace_back(std::to_string(i));
-                        m_pfileDialog->SetTypeFilters({ ".obj", ".stl"});
-                        m_pfileDialog->Open();
+                        m_fileDialog.SetTypeFilters({ ".obj", ".stl"});
+                        m_fileDialog.Open();
                     }
                     if(ImGui::Button(("Change texture"+ std::to_string(i)).c_str()))
                     {
                         m_fileDialogType = 1;
                         m_fileDialogArgs.clear();
                         m_fileDialogArgs.emplace_back(std::to_string(i));
-                        m_pfileDialog->SetTypeFilters({ ".png", ".jpg"});
-                        m_pfileDialog->Open();
+                        m_fileDialog.SetTypeFilters({ ".png", ".jpg"});
+                        m_fileDialog.Open();
                     }
                 }
             }
@@ -322,41 +316,26 @@ public:
                     const char* items[] = { "part0", "part1", "part2", "part3", "part4", "part5", "part6", "part7", "part8", "part9" };
                     ImGui::Combo(("bind part" + std::to_string(i)).c_str(), &model_joint_bind_part[i], items, model_part_num);
                     // type
-                    ImGui::RadioButton(("rotate x " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_X); 
-                    ImGui::SameLine();
+                    ImGui::RadioButton(("rotate x " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_X); ImGui::SameLine();
                     ImGui::RadioButton(("translate x " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_X); 
-                    ImGui::RadioButton(("rotate y " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Y); 
-                    ImGui::SameLine();
+                    ImGui::RadioButton(("rotate y " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Y); ImGui::SameLine();
                     ImGui::RadioButton(("translate y " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_Y); 
-                    ImGui::RadioButton(("rotate z " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Z); 
-                    ImGui::SameLine();
+                    ImGui::RadioButton(("rotate z " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_ROTATE_Z); ImGui::SameLine();
                     ImGui::RadioButton(("translate z " + std::to_string(i)).c_str(), &model_joint_bind_type[i], JOINT_TYPE_TRANSLATE_Z);
                 }
             }
 
-            if (ImGui::CollapsingHeader("joint control")) {
+            if (ImGui::CollapsingHeader("angle control")) {
                 ImGui::Separator();
-                ImGui::Text("joint control editor");
+                ImGui::Text("angle editor");
                 for(int i = 0; i < model_joint_num; i++)
                 {
                     ImGui::Separator();
                     ImGui::Text("joint %d", i);
-                    if(model_joint_bind_type[i] == JOINT_TYPE_ROTATE_X || model_joint_bind_type[i] == JOINT_TYPE_ROTATE_Y || model_joint_bind_type[i] == JOINT_TYPE_ROTATE_Z) {
-                        ImGui::DragFloat(("angle" + std::to_string(i)).c_str(), &model_joint_ctrl[i], 1, -720.0f, 720.0f);
-                    }
-                    else if(model_joint_bind_type[i] == JOINT_TYPE_TRANSLATE_X || model_joint_bind_type[i] == JOINT_TYPE_TRANSLATE_Y || model_joint_bind_type[i] == JOINT_TYPE_TRANSLATE_Z) {
-                        ImGui::DragFloat(("translate" + std::to_string(i)).c_str(), &model_joint_ctrl[i], 0.01f, -10.0f, 10.0f);
-                    }
+                    ImGui::DragFloat(("angle" + std::to_string(i)).c_str(), &model_joint_angle[i], 1, -720.0f, 720.0f);
                 }
             }
 
-            if (ImGui::Button("Save")) {
-                SaveModel();
-            }
-
-            if (ImGui::Button("Load")) {
-                LoadModel();
-            }
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();            
         }
@@ -378,12 +357,12 @@ public:
             glm::vec3 rots = glm::vec3(0.0f);
             for(int j = 0; j < model_joint_num; ++j) {
                 if(model_joint_bind_part[j] == i){
-                    if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_X) rots.x += model_joint_ctrl[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Y) rots.y += model_joint_ctrl[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Z) rots.z += model_joint_ctrl[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_X) trans.x += model_joint_ctrl[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Y) trans.y += model_joint_ctrl[j];
-                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Z) trans.z += model_joint_ctrl[j]; 
+                    if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_X) rots.x += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Y) rots.y += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_ROTATE_Z) rots.z += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_X) trans.x += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Y) trans.y += model_joint_angle[j];
+                    else if(model_joint_bind_type[j] == JOINT_TYPE_TRANSLATE_Z) trans.z += model_joint_angle[j]; 
                 }
             }
             p.Translate(model_part_pos[i]->x, model_part_pos[i]->y, model_part_pos[i]->z);
@@ -394,16 +373,25 @@ public:
             p.Scale(model_part_scale[i]->x, model_part_scale[i]->y, model_part_scale[i]->z);
             p.SetCamera(*m_pCamera);
             p.SetPerspectiveProj(m_persParam);
-            model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans());
+            model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
             pbase.SetBaseMatrix(p.GetWorldTrans());
             pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
         }
 
+        // 渲染空间站
+        // Pipeline p;
+        // p.SetCamera(*m_pCamera);
+        // p.SetPerspectiveProj(m_persParam);
+        // p.Translate(space_station_pos.x, space_station_pos.y, space_station_pos.z);
+        // p.Rotate(space_station_rot.x, space_station_rot.y, space_station_rot.z);
+        // p.Scale(space_station_scale.x, space_station_scale.y, space_station_scale.z);
+        // space_station_mesh.Render(p.GetWVPTrans(), p.GetWorldTrans());
         m_pBasicLight->Disable();
+        // m_pSkyBox->Render();
 
         // 渲染文件管理器
-        m_pfileDialog->Display();
-        if(m_pfileDialog->HasSelected())
+        m_fileDialog.Display();
+        if(m_fileDialog.HasSelected())
         {
             if(m_fileDialogType == 0) {
                 // 实现选中新模型文件
@@ -414,12 +402,11 @@ public:
                 ss >> id;
                 SAFE_DELETE(model_part_mesh[id]);
                 model_part_mesh[id] = new Mesh();
-                model_part_mesh_name[id] = m_pfileDialog->GetSelected().string();
-                if(!model_part_mesh[id]->LoadMesh(m_pfileDialog->GetSelected().string().c_str())){
-                    printf("Load mesh %s failed!\n", m_pfileDialog->GetSelected().string().c_str());
+                if(!model_part_mesh[id]->LoadMesh(m_fileDialog.GetSelected().string().c_str())){
+                    printf("Load mesh %s failed!\n", m_fileDialog.GetSelected().string().c_str());
                     return false;
                 }
-                printf("load mesh %s success\n", m_pfileDialog->GetSelected().string().c_str());
+                printf("load mesh %s success\n", m_fileDialog.GetSelected().string().c_str());
             } else if(m_fileDialogType == 1) {
                 // 实现选中新模型纹理
                 // m_fileDialogArgs[0] -> int 目标模型id
@@ -428,19 +415,14 @@ public:
                 int id;
                 ss >> id;
                 SAFE_DELETE(model_part_texture[id]);
-                model_part_texture[id] = new Texture(GL_TEXTURE_2D, m_pfileDialog->GetSelected().string().c_str());
-                model_part_texture_name[id] = m_pfileDialog->GetSelected().string();
+                model_part_texture[id] = new Texture(GL_TEXTURE_2D, m_fileDialog.GetSelected().string().c_str());
                 if (!model_part_texture[id]->Load()) {
-                    printf("Load mesh %s failed!\n", m_pfileDialog->GetSelected().string().c_str());
+                    printf("Load mesh %s failed!\n", m_fileDialog.GetSelected().string().c_str());
                     return false;
                 }
-                printf("load mesh %s success\n", m_pfileDialog->GetSelected().string().c_str());
-            } else if(m_fileDialogType == 2) {
-                // 选中需要保存的文件名
-            } else if(m_fileDialogType == 3) {
-                // 选中需要读取的文件名
+                printf("load mesh %s success\n", m_fileDialog.GetSelected().string().c_str());
             }
-            m_pfileDialog->ClearSelected();
+            m_fileDialog.ClearSelected();
         }
 
         // printf("Check9\n");
@@ -453,7 +435,7 @@ public:
     }
 private:
     // 文件对话框类型，参数
-    ImGui::FileBrowser* m_pfileDialog;
+    ImGui::FileBrowser m_fileDialog;
     int m_fileDialogType;
     std::vector<std::string> m_fileDialogArgs;
 
@@ -465,9 +447,7 @@ private:
     glm::vec3* model_part_scale[MAX_MODEL_PARTS];
 
     Mesh*    model_part_mesh[MAX_MODEL_PARTS];
-    std::string model_part_mesh_name[MAX_MODEL_PARTS];
     Texture* model_part_texture[MAX_MODEL_PARTS];
-    std::string model_part_texture_name[MAX_MODEL_PARTS];
 
 private:
     // 机器人关节个数，绑定的模型变量
@@ -482,16 +462,27 @@ private:
     int model_joint_num;
     int model_joint_bind_type[MAX_MODEL_PARTS];
     int model_joint_bind_part[MAX_MODEL_PARTS];
-    float model_joint_ctrl[MAX_MODEL_PARTS];
+    float model_joint_angle[MAX_MODEL_PARTS];
+
+private:
+    SkyBox* m_pSkyBox;
 
 private:
     // 全局控制变量
     static bool show_main_window;
     static glm::vec4 clearColor;
+private:
+    static bool show_generate_model_window;
+    static bool show_model_joint_window;
+    static bool show_model_angle_window;
+    static bool show_scene_window;
 };
-bool EditorScene::show_main_window;
+bool ModelEditor::show_main_window;
+bool ModelEditor::show_generate_model_window;
+bool ModelEditor::show_model_joint_window;
+bool ModelEditor::show_model_angle_window;
 
-glm::vec4 EditorScene::clearColor;
+glm::vec4 ModelEditor::clearColor;
 
 
 class ExtraScene: public Scene
@@ -695,12 +686,10 @@ public:
 
         return true;
     }
-private:
     Mesh* m_pMesh;
     ImGui::FileBrowser* m_pfileDialog;
     Texture* m_pTexture;
     Mesh* m_pSphereMesh;
-private:
     int broswerType;
     glm::vec4 clearColor;
     int ctrlPointNum;
@@ -716,15 +705,19 @@ private:
 int main(int argc, char **argv)
 { 
     SceneController controller;
-    Scene* pMainScene = new EditorScene();
+    Scene* pEntryScene = new EntryScene();
+    Scene* pModelEditorScene = new ModelEditor();
     Scene* pExtraScene = new ExtraScene();
 
-    controller.AddScene(pMainScene);
+    controller.AddScene(pEntryScene);
+    controller.AddScene(pModelEditorScene);
     controller.AddScene(pExtraScene);
 
     controller.Run(argc, argv);
 
-    delete pMainScene;
+    delete pEntryScene;
+    delete pModelEditorScene;
+    delete pExtraScene;
 
     return 0;
 }
