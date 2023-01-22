@@ -122,9 +122,9 @@ struct JointMesh
             if(!norender){
                 model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
             }
-            EndTransMatrix = p.GetWorldTrans();
             pbase.SetBaseMatrix(p.GetWorldTrans());
             pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
+            EndTransMatrix = pbase.GetWorldTrans();
         }
         return EndTransMatrix;
     }
@@ -923,13 +923,13 @@ public:
         m_pfileDialog->SetTitle("Select a file");
 
         m_directionalLight.DiffuseIntensity = 0.5f;
+        m_directionalLight.Direction.y = 1.0f;
         m_persParam.zFar = 1000.0f;
 
         showSkyBox = true;
 
         m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
 
-        reverse_base = glm::mat4x4(1.0f);
         model_mesh_reverse.LoadModel("output/robot_rev.model");
 
         if (!m_pSkyBox->Init("pic",
@@ -943,6 +943,12 @@ public:
             printf("SkyBox Init Failed\n");
             return false;
         }  
+
+        SphereMesh sphere;
+        sphere.set(100.0, 10, 10);
+        sphere.buildVertices();
+        m_pSphereMesh = new Mesh();
+        m_pSphereMesh->InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/sun.jpg");
 
         LoadScene("output/testscene2.scene");
         return true;
@@ -966,12 +972,18 @@ public:
         fin >> model_num;
         for(int i = 0; i < model_num; ++i) {
             fin >> model_mesh_name[i];
+            SAFE_DELETE(model_base[i]);
+            model_base[i] = new glm::mat4x4(1.0f);
+            SAFE_DELETE(model_pos[i]);
             model_pos[i] = new glm::vec3();
+            SAFE_DELETE(model_rot[i]);
             model_rot[i] = new glm::vec3();
+            SAFE_DELETE(model_scale[i]);
             model_scale[i] = new glm::vec3();
             fin >> model_pos[i]->x >> model_pos[i]->y >> model_pos[i]->z;
             fin >> model_rot[i]->x >> model_rot[i]->y >> model_rot[i]->z;
             fin >> model_scale[i]->x >> model_scale[i]->y >> model_scale[i]->z;
+            SAFE_DELETE(model_mesh[i]);
             model_mesh[i] = new JointMesh();
             model_mesh[i]->LoadModel(model_mesh_name[i]);
             for(int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
@@ -1051,6 +1063,7 @@ public:
                 ImGui::Text("model editor");
                 if (ImGui::Button("load new model") && model_num < MAX_SCENE_MODEL){
                     model_num++;
+                    model_base[model_num - 1] = new glm::mat4x4(1.0f);
                     model_pos[model_num - 1] = new glm::vec3(0.0f, 0.0f, 0.0f);
                     model_rot[model_num - 1] = new glm::vec3(0.0f, 0.0f, 0.0f);
                     model_scale[model_num - 1] = new glm::vec3(1.0f, 1.0f, 1.0f);
@@ -1081,35 +1094,65 @@ public:
                 for (int i = 0; i < model_num; ++i) {
                     ImGui::Separator();
                     std::string mesh_name = "mesh " + std::to_string(i);
+                    // 以下包括处理首尾关节的错误角度的补丁
+                    // TODO: 虽然整体形状正确，但是首尾关节的旋转方向不对，需要修正
                     if(ImGui::CollapsingHeader(mesh_name.c_str())) {
                         for (int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
                             ImGui::Text("joint %d", j);
-                            ImGui::DragFloat(("joint angle " + std::to_string(j)).c_str(), &model_mesh[i]->model_joint_ctrl[j], 1, -720.0f, 720.0f);
+                            if(model_mesh_name[i] != "output\\robot.model"){
+                                ImGui::DragFloat(("joint angle " + std::to_string(j)).c_str(), &model_mesh[i]->model_joint_ctrl[j], 1, -720.0f, 720.0f);
+                            } else if(!showReverseRobot) {
+                                ImGui::DragFloat(("joint angle " + std::to_string(j)).c_str(), &model_mesh[i]->model_joint_ctrl[j], 1, -720.0f, 720.0f);
+                            } else {
+                                ImGui::DragFloat(("joint angle " + std::to_string(j)).c_str(), &model_mesh_reverse.model_joint_ctrl[j], 1, -720.0f, 720.0f);
+                            }
                         }
                     }
                     if(model_mesh_name[i] == "output\\robot.model") {
                         if(ImGui::Button("robot reverse")) {
+                            for(int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
+                                if(!showReverseRobot){
+                                    model_mesh_reverse.model_joint_ctrl[j] = model_mesh[i]->model_joint_ctrl[model_mesh[i]->model_joint_num - j - 1];
+                                    if(j == 0){
+                                        model_mesh_reverse.model_joint_ctrl[j] = 180.0f - model_mesh[i]->model_joint_ctrl[model_mesh[i]->model_joint_num - j - 1];
+                                        if(model_mesh_reverse.model_joint_ctrl[j] > 360.0f) {
+                                            model_mesh_reverse.model_joint_ctrl[j] -= 360.0f;
+                                        }
+                                        if(model_mesh_reverse.model_joint_ctrl[j] < 0.0f) {
+                                            model_mesh_reverse.model_joint_ctrl[j] += 360.0f;
+                                        }
+                                    } 
+                                }
+                                else {
+                                    model_mesh[i]->model_joint_ctrl[j] = model_mesh_reverse.model_joint_ctrl[model_mesh[i]->model_joint_num - j - 1];
+                                    if(j == 0) {
+                                        model_mesh[i]->model_joint_ctrl[j] = 180.0f - model_mesh_reverse.model_joint_ctrl[model_mesh[i]->model_joint_num - j - 1];
+                                        if(model_mesh[i]->model_joint_ctrl[j] > 360.0f) {
+                                            model_mesh[i]->model_joint_ctrl[j] -= 360.0f;
+                                        }
+                                        if(model_mesh[i]->model_joint_ctrl[j] < 0.0f) {
+                                            model_mesh[i]->model_joint_ctrl[j] += 360.0f;
+                                        }
+                                    }
+                                }
+                            } 
                             Pipeline base;
-                            base.SetBaseMatrix(reverse_base);
+                            base.SetBaseMatrix(*model_base[i]);
                             base.Translate(model_pos[i]->x, model_pos[i]->y, model_pos[i]->z);
                             base.Rotate(model_rot[i]->x, model_rot[i]->y, model_rot[i]->z);
                             base.Scale(model_scale[i]->x, model_scale[i]->y, model_scale[i]->z);
-                            if(!showReverseJoints) {
-                                reverse_base = model_mesh[i]->Render(base.GetWorldTrans(), *m_pCamera, m_persParam, true);
-                                for(int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
-                                    // model_joint_ctrl[j] = model_mesh[i]->model_joint_ctrl[model_mesh[i]->model_joint_num - 1 - j];
-                                }
+                            if(!showReverseRobot) {
+                                *model_base[i] = model_mesh[i]->Render(base.GetWorldTrans(), *m_pCamera, m_persParam, true);
                             } else {
-                                reverse_base = model_mesh_reverse.Render(base.GetWorldTrans(), *m_pCamera, m_persParam, true);
-                                for(int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
-                                    model_mesh[i]->model_joint_ctrl[j] = model_mesh_reverse.model_joint_ctrl[model_mesh[i]->model_joint_num - 1 - j];
-                                }
+                                *model_base[i] = model_mesh_reverse.Render(base.GetWorldTrans(), *m_pCamera, m_persParam, true);
                             }
                             *model_pos[i] = glm::vec3(0.0f, 0.0f, 0.0f);
                             *model_rot[i] = glm::vec3(0.0f, 0.0f, 0.0f);
                             *model_scale[i] = glm::vec3(1.0f, 1.0f, 1.0f);
-                            showReverseJoints = !showReverseJoints;
+                            showReverseRobot = !showReverseRobot;
                         }
+                        ImGui::SameLine();
+                        ImGui::Text("Currently robot is %s", showReverseRobot ? "reverse" : "normal");
                     }
                 }
                 
@@ -1149,11 +1192,20 @@ public:
         for(int i = 0; i < model_num; i++)
         {
             Pipeline pbase;
+            pbase.SetBaseMatrix(*model_base[i]);
             pbase.Translate(model_pos[i]->x, model_pos[i]->y, model_pos[i]->z);
             pbase.Rotate(model_rot[i]->x, model_rot[i]->y, model_rot[i]->z);
             pbase.Scale(model_scale[i]->x, model_scale[i]->y, model_scale[i]->z);
-
-            model_mesh[i]->Render(pbase.GetWorldTrans(), *m_pCamera, m_persParam);
+            if(model_mesh_name[i] != "output\\robot.model"){
+                model_mesh[i]->Render(pbase.GetWorldTrans(), *m_pCamera, m_persParam);
+            }
+            else{
+                if(!showReverseRobot) {
+                    model_mesh[i]->Render(pbase.GetWorldTrans(), *m_pCamera, m_persParam);
+                } else {
+                    model_mesh_reverse.Render(pbase.GetWorldTrans(), *m_pCamera, m_persParam);
+                }
+            }
         }
 
 
@@ -1172,6 +1224,8 @@ public:
                 int index = std::stoi(m_fileDialogArgs[0]);
                 SAFE_DELETE(model_mesh[index]);
                 model_mesh[index] = new JointMesh();
+                SAFE_DELETE(model_base[index]);
+                model_base[index] = new glm::mat4(1.0f);
                 SAFE_DELETE(model_pos[index]);
                 model_pos[index] = new glm::vec3(0.0f, 0.0f, 0.0f);
                 SAFE_DELETE(model_rot[index]);
@@ -1203,9 +1257,10 @@ public:
         return true;
     }
 private:
+    Mesh* m_pSphereMesh;
     SkyBox* m_pSkyBox;
     bool showSkyBox;
-    bool showReverseJoints;
+    bool showReverseRobot;
 private:
     ImGui::FileBrowser* m_pfileDialog;
     int m_fileDialogType;
@@ -1214,8 +1269,8 @@ private:
     int model_num;
     JointMesh* model_mesh[MAX_SCENE_MODEL]; 
     JointMesh model_mesh_reverse;
-    glm::mat4x4 reverse_base;
     std::string model_mesh_name[MAX_SCENE_MODEL];
+    glm::mat4x4* model_base[MAX_SCENE_MODEL];
     glm::vec3* model_pos[MAX_SCENE_MODEL];
     glm::vec3* model_rot[MAX_SCENE_MODEL];
     glm::vec3* model_scale[MAX_SCENE_MODEL];
