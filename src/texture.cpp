@@ -179,6 +179,7 @@ bool CubemapTexture::Load()
         stbi_image_free(image_data);
     }
 
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     return true;
 }
 
@@ -187,4 +188,9 @@ void CubemapTexture::Bind(GLenum TextureUnit)
 {
     glActiveTexture(TextureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureObj);
+}
+void CubemapTexture::Unbind(GLenum TextureUnit)
+{
+    glActiveTexture(TextureUnit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }

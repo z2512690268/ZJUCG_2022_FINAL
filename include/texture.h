@@ -59,6 +59,8 @@ public:
 
     void Bind(GLenum TextureUnit);
 
+    void Unbind(GLenum TextureUnit);
+
 private:
 
     std::string m_fileNames[6];

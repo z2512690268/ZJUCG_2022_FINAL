@@ -98,7 +98,6 @@ bool SkyBox::Init(const std::string& Directory,
                                        NegYFilename,
                                        PosZFilename,
                                        NegZFilename);
-
     if (!m_pCubemapTex->Load()) {
         printf("Loading Skybox Failure!\n");
         return false;
@@ -110,6 +109,7 @@ bool SkyBox::Init(const std::string& Directory,
     if(!ret) {
         printf("Loading Skybox Mesh Failure!\n");
     }
+    m_pSkyboxTechnique->Disable();
     return ret;
 }
 
@@ -137,6 +137,7 @@ void SkyBox::Render()
 
     m_pCubemapTex->Bind(GL_TEXTURE0);
     m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
+    m_pCubemapTex->Unbind(GL_TEXTURE0);
 
     glCullFace(OldCullFaceMode);
     glDepthFunc(OldDepthFuncMode);

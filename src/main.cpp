@@ -38,7 +38,8 @@ static const float FieldWidth = 25.0f;
 #define MODEL_EDITOR 2
 #define BAZIER_EDITOR 3
 #define SCENE_EDITOR 4
-#define SCENE_ROAMING 5
+#define PICKING_DEMO 5
+#define SHADOW_DEMO 6
 
 glm::vec4 clearColor;
 
@@ -91,8 +92,9 @@ struct JointMesh
         }
         fin.close();
     }
-    void Render(const glm::mat4x4& WorldMatrix, const CameraBase& Camera, const PersParam &persParam) {
+    glm::mat4x4 Render(const glm::mat4x4& WorldMatrix, const CameraBase& Camera, const PersParam &persParam, bool norender = false) {
         Pipeline pbase;
+        glm::mat4x4 EndTransMatrix;
         pbase.SetBaseMatrix(WorldMatrix);
         for(int i = 0; i < model_part_num; ++i) {
             Pipeline p;
@@ -117,10 +119,14 @@ struct JointMesh
             p.Scale(model_part_scale[i]->x, model_part_scale[i]->y, model_part_scale[i]->z);
             p.SetCamera(Camera);
             p.SetPerspectiveProj(persParam);
-            model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
+            if(!norender){
+                model_part_mesh[i]->Render(p.GetWVPTrans(), p.GetWorldTrans(), model_part_texture[i]);
+            }
+            EndTransMatrix = p.GetWorldTrans();
             pbase.SetBaseMatrix(p.GetWorldTrans());
             pbase.Scale(1.0f / model_part_scale[i]->x, 1.0f / model_part_scale[i]->y, 1.0f / model_part_scale[i]->z);
         }
+        return EndTransMatrix;
     }
     // 机器人模型组件个数，位置，姿态，模型
     int model_part_num;
@@ -189,7 +195,21 @@ public:
                 m_ret = SCENE_EDITOR;
                 glutLeaveMainLoop();
             }
+            if(ImGui::CollapsingHeader("Other Exhibition")) {
 
+                if(ImGui::Button("Picking Demo", ImVec2(400, 50)))
+                {
+                    m_ret = PICKING_DEMO;
+                    glutLeaveMainLoop();
+                }
+                
+                if(ImGui::Button("SHADOW Demo", ImVec2(400, 50)))
+                {
+                    m_ret = SHADOW_DEMO;
+                    glutLeaveMainLoop();
+                }
+
+            }
             ImGui::End();
         }
 
@@ -892,8 +912,10 @@ class SceneEditor : public Scene
 {
 public:
     SceneEditor() : Scene(MODEL_CAMERA) {
+        m_pSkyBox = nullptr;
     }
     ~SceneEditor() {
+        SAFE_DELETE(m_pSkyBox);
     }
     virtual bool Init() {
         clearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -902,6 +924,27 @@ public:
 
         m_directionalLight.DiffuseIntensity = 0.5f;
         m_persParam.zFar = 1000.0f;
+
+        showSkyBox = true;
+
+        m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
+
+        reverse_base = glm::mat4x4(1.0f);
+        model_mesh_reverse.LoadModel("output/robot_rev.model");
+
+        if (!m_pSkyBox->Init("pic",
+                "starsbox_right1.png",
+                "starsbox_left2.png",
+                "starsbox_top3.png",
+                "starsbox_bottom4.png",
+                "starsbox_front5.png",
+                "starsbox_back6.png"
+                )) {
+            printf("SkyBox Init Failed\n");
+            return false;
+        }  
+
+        LoadScene("output/testscene2.scene");
         return true;
     }
     void SaveScene(std::string filename = "scene.scene") {
@@ -953,6 +996,7 @@ public:
                 ImGui::DragFloat("Ambient", &m_directionalLight.AmbientIntensity, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Diffuse", &m_directionalLight.DiffuseIntensity, 0.01f, 0.0f, 1.0f);
                 ImGui::DragFloat3("direction", (float*)&m_directionalLight.Direction, 0.01f, -10.0f, 10.0f);
+                ImGui::Checkbox("show skybox", &showSkyBox);
             }
             // 相机控制
             if (ImGui::CollapsingHeader("camera control")){
@@ -1043,13 +1087,46 @@ public:
                             ImGui::DragFloat(("joint angle " + std::to_string(j)).c_str(), &model_mesh[i]->model_joint_ctrl[j], 1, -720.0f, 720.0f);
                         }
                     }
+                    if(model_mesh_name[i] == "output\\robot.model") {
+                        if(ImGui::Button("robot reverse")) {
+                            Pipeline base;
+                            base.SetBaseMatrix(reverse_base);
+                            base.Translate(model_pos[i]->x, model_pos[i]->y, model_pos[i]->z);
+                            base.Rotate(model_rot[i]->x, model_rot[i]->y, model_rot[i]->z);
+                            base.Scale(model_scale[i]->x, model_scale[i]->y, model_scale[i]->z);
+                            if(!showReverseJoints) {
+                                reverse_base = model_mesh[i]->Render(base.GetWorldTrans(), *m_pCamera, m_persParam, true);
+                                for(int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
+                                    // model_joint_ctrl[j] = model_mesh[i]->model_joint_ctrl[model_mesh[i]->model_joint_num - 1 - j];
+                                }
+                            } else {
+                                reverse_base = model_mesh_reverse.Render(base.GetWorldTrans(), *m_pCamera, m_persParam, true);
+                                for(int j = 0; j < model_mesh[i]->model_joint_num; ++j) {
+                                    model_mesh[i]->model_joint_ctrl[j] = model_mesh_reverse.model_joint_ctrl[model_mesh[i]->model_joint_num - 1 - j];
+                                }
+                            }
+                            *model_pos[i] = glm::vec3(0.0f, 0.0f, 0.0f);
+                            *model_rot[i] = glm::vec3(0.0f, 0.0f, 0.0f);
+                            *model_scale[i] = glm::vec3(1.0f, 1.0f, 1.0f);
+                            showReverseJoints = !showReverseJoints;
+                        }
+                    }
                 }
+                
             }
             if (ImGui::Button("Save Scene", ImVec2(290, 0))) {
-                SaveScene();
+                SAFE_DELETE(m_pfileDialog);
+                m_pfileDialog = new ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
+                m_fileDialogType = 2;
+                m_fileDialogArgs.clear();
+                m_pfileDialog->SetTypeFilters({ ".scene"});
+                m_pfileDialog->Open();
             }
             if (ImGui::Button("Load Scene", ImVec2(290, 0))) {
-                LoadScene();
+                m_fileDialogType = 3;
+                m_fileDialogArgs.clear();
+                m_pfileDialog->SetTypeFilters({ ".scene"});
+                m_pfileDialog->Open();
             }
             ImGui::Text("Application average %.3f ms/frame\n(%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             if (ImGui::Button("Return to Entry Scene", ImVec2(290, 0))) {
@@ -1063,19 +1140,27 @@ public:
 
     virtual bool Render()
     {
+        // printf("Check1\n");
         glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
         // printf("CHeck\n");
         /// 渲染机械臂模型
         // printf("Check8\n");
         m_pBasicLight->Enable();
-        Pipeline pbase;
         for(int i = 0; i < model_num; i++)
         {
+            Pipeline pbase;
             pbase.Translate(model_pos[i]->x, model_pos[i]->y, model_pos[i]->z);
             pbase.Rotate(model_rot[i]->x, model_rot[i]->y, model_rot[i]->z);
             pbase.Scale(model_scale[i]->x, model_scale[i]->y, model_scale[i]->z);
 
             model_mesh[i]->Render(pbase.GetWorldTrans(), *m_pCamera, m_persParam);
+        }
+
+
+        // printf("Check4\n");
+        if(showSkyBox)
+        {
+            m_pSkyBox->Render();
         }
         m_pBasicLight->Disable();
 
@@ -1095,20 +1180,32 @@ public:
                 model_scale[index] = new glm::vec3(1.0f, 1.0f, 1.0f);
                 model_mesh[index]->LoadModel(m_pfileDialog->GetSelected().string().c_str());
                 model_mesh_name[index] = m_pfileDialog->GetSelected().string();
+            } else if (m_fileDialogType == 2) {
+                // save scene
+                SaveScene(m_pfileDialog->GetSelected().string().c_str());
+                SAFE_DELETE(m_pfileDialog);
+                m_pfileDialog = new ImGui::FileBrowser();
+            } else if (m_fileDialogType == 3) {
+                // load scene
+                LoadScene(m_pfileDialog->GetSelected().string().c_str());
             }
             m_pfileDialog->ClearSelected();
         }
 
+        // printf("Check3\n");
         // printf("Check9\n");
         int ret = ImGuiPanel();
         if (!ret) return false;
         ImGui::Render();
         // // Draw
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+        // printf("Check2\n");
         return true;
     }
 private:
     SkyBox* m_pSkyBox;
+    bool showSkyBox;
+    bool showReverseJoints;
 private:
     ImGui::FileBrowser* m_pfileDialog;
     int m_fileDialogType;
@@ -1116,10 +1213,331 @@ private:
 private:
     int model_num;
     JointMesh* model_mesh[MAX_SCENE_MODEL]; 
+    JointMesh model_mesh_reverse;
+    glm::mat4x4 reverse_base;
     std::string model_mesh_name[MAX_SCENE_MODEL];
     glm::vec3* model_pos[MAX_SCENE_MODEL];
     glm::vec3* model_rot[MAX_SCENE_MODEL];
     glm::vec3* model_scale[MAX_SCENE_MODEL];
+};
+
+
+class PickingScene : public Scene
+{
+public:
+    PickingScene(void) : Scene(MOVE_CAMERA), sphereCount(36), m_sectorCount(36), m_stackCount(18)
+    {
+        m_predtexture = nullptr;
+        return;
+    }
+    ~PickingScene(void)
+    {
+        SAFE_DELETE(m_predtexture);
+        return;
+    }
+
+    virtual bool Init(void)
+    {
+        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+
+        m_scale = 0;
+        SphereMesh sphere;
+        sphere.set(0.2, m_sectorCount, m_stackCount);
+        sphere.buildVertices();
+        PyramidMesh pyramid(0.1f, 15.0f, 0.4f);
+
+        m_directionalLight.DiffuseIntensity = 0.5f;
+
+        m_sphere.InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/orange.jpg");
+        m_pyraid.InitVertexMesh(pyramid.Vertices, pyramid.Indices, "pic/007FFF.jpg");
+
+        if (!m_pickingTexture.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
+            return false;
+        }
+        
+        if (!m_pickingEffect.Init()) {
+            return false;
+        }
+
+        m_predtexture = new Texture(GL_TEXTURE_2D, "pic/red.jpg");
+        if (!m_predtexture->Load()) {
+            return false;
+        }
+
+        m_selectedId = 1;
+        return true;
+    }
+
+    void PickPass(void)
+    {
+        m_pickingTexture.EnableWriting();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        m_pickingEffect.Enable();
+
+        int k = 0;
+        Pipeline tp;
+        tp.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        tp.SetPerspectiveProj(m_persParam);
+
+        for(int i = -3; i < 3; i++){
+            for(int j = -3; j < 3; j++)
+            {
+                tp.Translate(i * 0.5, 0, j * 0.5);
+                m_pickingEffect.SetWVP(tp.GetWVPTrans());
+                ++k;
+
+                m_pickingEffect.SetObjectIndex(k);
+                m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                
+                tp.Translate(i * 0.5, 0.2f, j * 0.5);
+                m_pickingEffect.SetWVP(tp.GetWVPTrans());
+                ++k;
+
+                m_pickingEffect.SetObjectIndex(k);
+                m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+
+            }
+        }
+
+        m_pickingEffect.Disable();
+        m_pickingTexture.DisableWriting();     
+    }
+
+    void RenderPass(void)
+    {
+        m_pBasicLight->Enable();
+        int k = 0;
+        Pipeline tp;
+        tp.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        tp.SetPerspectiveProj(m_persParam);
+
+        for(int i = -3; i < 3; i++){
+            for(int j = -3; j < 3; j++)
+            {
+                tp.Translate(i * 0.5, 0, j * 0.5);
+                ++k;
+                if (k != m_selectedId){
+                    m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                } else {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                    m_sphere.Render(tp.GetWVPTrans(), tp.GetWorldTrans(), m_predtexture);
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                }
+
+                tp.Translate(i * 0.5, 0.2f, j * 0.5);
+                ++k;
+                if (k != m_selectedId){
+                    m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans());
+                } else {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                    m_pyraid.Render(tp.GetWVPTrans(), tp.GetWorldTrans(), m_predtexture);
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                }
+            }
+        }
+
+        m_pBasicLight->Disable();
+    }
+
+    virtual bool Render(void)
+    {
+        PickPass();
+        RenderPass();
+        return true;
+    }
+
+    virtual void MouseCB(CALLBACK_MOUSE Button, CALLBACK_MOUSE_STATE State, int x, int y) {
+        if (Button == CALLBACK_MOUSE_BUTTON_LEFT && State == CALLBACK_MOUSE_STATE_PRESS) {
+            PixelInfo Pixel = m_pickingTexture.ReadPixel(x, GAMEMODE_WINDOW_HEIGHT - y);
+            m_selectedId = Pixel.ObjectID;
+        }
+    };
+
+    
+private:
+    Mesh m_sphere;
+    Mesh m_pyraid;
+    float m_radius;
+    int m_sectorCount;
+    int m_stackCount;
+    const int sphereCount;
+    PickingTexture m_pickingTexture;
+    PickingTechnique m_pickingEffect;
+    Texture* m_predtexture;
+    int m_selectedId;
+    float m_scale;
+};
+
+class ShadowDemo : public Scene
+{
+public:
+    ShadowDemo() : Scene(MOVE_CAMERA) {
+        m_pMesh = nullptr;
+        m_pFloor = nullptr;
+        m_pSkyBox = nullptr;
+        m_pShadowMapEffect = nullptr;
+    }
+    ~ShadowDemo() {
+        SAFE_DELETE(m_pMesh);
+        SAFE_DELETE(m_pFloor);
+        SAFE_DELETE(m_pSkyBox);
+        SAFE_DELETE(m_pShadowMapEffect);
+    }
+    virtual bool Init()
+    {
+        if (!m_shadowMapFBO.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
+            return false;
+        }
+
+        m_pShadowMapEffect = new ShadowMapTechnique();
+        if (!m_pShadowMapEffect->Init()) {
+            printf("Error initializing the shadow map technique\n");
+            return false;
+        }
+        // init spotlight mesh
+        SphereMesh sphere;
+        sphere.set(1.0, 10, 10);
+        sphere.buildVertices();
+        m_pSphereMesh = new Mesh();
+        m_pSphereMesh->InitVertexMesh(sphere.getVertices(), sphere.getIndices(), "pic/sun.jpg");
+
+
+        // init spot light
+        m_spotLight.AmbientIntensity = 0.1f;
+        m_spotLight.DiffuseIntensity = 0.9f;
+        m_spotLight.Color = glm::vec3(1.0f, 1.0f, 1.0f);
+        m_spotLight.Attenuation.Linear = 0.1f;
+        m_spotLight.Position = glm::vec3(FieldWidth / 2 + 30.0f, 40.0f, FieldDepth / 2);
+        m_spotLight.Direction = glm::vec3(-1.0f, -1.0f, 0.0f);
+        m_spotLight.Cutoff = 20.0f;
+
+        m_pBasicLight->Enable();
+        m_pBasicLight->SetSpotLights(1, &m_spotLight);
+        m_pBasicLight->Disable();
+        // init camera
+        glm::vec3 Pos(FieldWidth / 2, 1.0f, FieldDepth / 2);//初始化坐标，位于Field中间，距地面1.0f的位置
+        glm::vec3 Target(0.0f, 0.0f, 1.0f);                 //初始化视角方向，指向景深
+        glm::vec3 Up(0.0f, 1.0f, 0.0f);                     //初始化上方方向，垂直于Field
+        m_pCamera->SetPos(Pos);
+        m_pCamera->SetTarget(Target);
+        m_pCamera->SetUp(Up);
+
+       // init mesh
+        m_pMesh = new Mesh();
+        if (!m_pMesh->LoadMesh("mesh/phoenix_ugv.md2")) {
+            return false;
+        }
+        m_pFloor = new Mesh();
+        // init Plane
+        const glm::vec3 Normal = glm::vec3(0.0, 1.0f, 0.0f);
+
+        std::vector<Vertex> Vertices = {
+                                Vertex(glm::vec3(0.0f, 0.0f, 0.0f),             glm::vec2(0.0f, 0.0f), Normal),
+                                Vertex(glm::vec3(0.0f, 0.0f, FieldDepth),       glm::vec2(0.0f, 1.0f), Normal),
+                                Vertex(glm::vec3(FieldWidth, 0.0f, 0.0f),       glm::vec2(1.0f, 0.0f), Normal),
+
+                                Vertex(glm::vec3(FieldWidth, 0.0f, 0.0f),       glm::vec2(1.0f, 0.0f), Normal),
+                                Vertex(glm::vec3(0.0f, 0.0f, FieldDepth),       glm::vec2(0.0f, 1.0f), Normal),
+                                Vertex(glm::vec3(FieldWidth, 0.0f, FieldDepth), glm::vec2(1.0f, 1.0f), Normal)
+                             };
+        std::vector<unsigned int> Indices = { 0, 1, 2, 3, 4, 5 };
+        m_pFloor->InitVertexMesh(Vertices, Indices, "pic/test.png");
+        
+        // init transform  param
+        m_scale = 0.0f;
+
+        // init skybox
+        m_pSkyBox = new SkyBox(m_pCamera, m_persParam);
+
+        if (!m_pSkyBox->Init("pic",
+                "sp3right.jpg",
+                "sp3left.jpg",
+                "sp3top.jpg",
+                "sp3bot.jpg",
+                "sp3front.jpg",
+                "sp3back.jpg")) {
+            return false;
+        }
+        return true;
+    }
+
+    void ShadowMapPass()
+    {
+        m_shadowMapFBO.BindForWriting();
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        m_pBasicLight->Enable();
+        Pipeline p;
+        p.Scale(0.1f, 0.1f, 0.1f);
+        p.Rotate(90.0f, 0.0f, m_scale);
+        p.Translate(FieldWidth / 2, 10.0f, FieldDepth / 2);
+        p.SetCamera(m_spotLight.Position, m_spotLight.Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        p.SetPerspectiveProj(m_persParam);
+        m_pBasicLight->SetLightWVP(p.GetWVPTrans());
+        m_pBasicLight->Disable();
+
+        m_pShadowMapEffect->Enable();
+        m_pShadowMapEffect->SetWVP(p.GetWVPTrans());
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
+
+        m_pShadowMapEffect->Disable();
+        m_shadowMapFBO.UnbindForWriting();
+    }
+
+    void RenderPass()
+    {
+        m_pBasicLight->Enable();
+
+        m_shadowMapFBO.BindForReading(GL_TEXTURE1);
+
+        Pipeline p;
+        p.Scale(0.1f, 0.1f, 0.1f);
+        p.Rotate(90.0f, 0.0f, m_scale);
+        p.Translate(FieldWidth / 2, 10.0f, FieldDepth / 2);
+        p.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p.SetPerspectiveProj(m_persParam);
+        m_pMesh->Render(p.GetWVPTrans(), p.GetWorldTrans());
+        
+        Pipeline p2;
+        p2.Translate(0.0f, 0.0f, 1.0f);
+        p2.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p2.SetPerspectiveProj(m_persParam);
+        m_pFloor->Render(p2.GetWVPTrans(), p2.GetWorldTrans());
+
+        Pipeline p3;
+        p3.Translate(m_spotLight.Position.x, m_spotLight.Position.y, m_spotLight.Position.z);
+        p3.SetCamera(m_pCamera->GetPos(), m_pCamera->GetTarget(), m_pCamera->GetUp());
+        p3.SetPerspectiveProj(m_persParam);
+        m_pSphereMesh->Render(p3.GetWVPTrans(), p3.GetWorldTrans());
+
+        m_pSkyBox->Render();
+
+        m_shadowMapFBO.UnbindForReading(GL_TEXTURE1);
+        m_pBasicLight->Disable();
+    }
+
+    virtual bool Render()
+    {
+        m_scale += 0.057f;
+
+        ShadowMapPass();
+        RenderPass();
+
+        return true;
+    }
+
+private:
+    Mesh* m_pMesh;
+    Mesh* m_pFloor;
+    float m_scale;
+    SkyBox* m_pSkyBox;
+    Mesh* m_pSphereMesh;
+
+    SpotLight m_spotLight;
+    ShadowMapFBO m_shadowMapFBO;
+
+    ShadowMapTechnique* m_pShadowMapEffect;
 };
 
 
@@ -1130,11 +1548,15 @@ int main(int argc, char **argv)
     Scene* pModelEditorScene = new ModelEditor();
     Scene* pExtraScene = new BazierEditor();
     Scene* pSceneEditorScene = new SceneEditor();
+    Scene* pPickingScene = new PickingScene();
+    Scene* pShadowMapScene = new ShadowDemo();
 
     controller.AddScene(pEntryScene);
     controller.AddScene(pModelEditorScene);
     controller.AddScene(pExtraScene);
     controller.AddScene(pSceneEditorScene);
+    controller.AddScene(pPickingScene);
+    controller.AddScene(pShadowMapScene);
 
     controller.Run(argc, argv);
 
