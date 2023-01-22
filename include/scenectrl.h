@@ -13,7 +13,6 @@ public:
     }
 
     int AddScene(Scene* pScene) {
-        if(m_scenes.size() > 9) return 0;
         m_scenes.push_back(pScene);
         return m_scenes.size() - 1;
     }
